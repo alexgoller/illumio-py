@@ -145,6 +145,20 @@ class ChangeType(str, Enum, metaclass=IllumioEnumMeta):
     DELETE = 'delete'
 
 
+class RuleAction(str, Enum, metaclass=IllumioEnumMeta):
+    """Rule action enumeration."""
+    ALLOW = 'allow'
+    DENY = 'deny'
+    OVERRIDE_DENY = 'override_deny'
+
+
+class BoundaryDecision(str, Enum, metaclass=IllumioEnumMeta):
+    """Boundary decision enumeration."""
+    BLOCKED = 'blocked'
+    BLOCKED_BY_OVERRIDE_DENY = 'blocked_by_override_deny'
+    BLOCKED_NON_ILLUMIO_RULE = 'blocked_non_illumio_rule'
+
+
 class EventSeverity(str, Enum, metaclass=IllumioEnumMeta):
     """Event severity enumeration."""
     EMERGENCY = 'emerg'
@@ -206,5 +220,7 @@ __all__ = [
     'EventSeverity',
     'EventStatus',
     'VisibilityLevelKeyTypes',
-    'ModeKeyTypes'
+    'ModeKeyTypes',
+    'RuleAction',
+    'BoundaryDecision'
 ]

@@ -16,8 +16,10 @@ from illumio.util import (
     Reference,
     MutableObject,
     pce_api,
-    RESOLVE_AS_WORKLOADS
+    RESOLVE_AS_WORKLOADS,
+    RuleAction
 )
+from illumio.exceptions import IllumioException
 from illumio.policyobjects import Service, ServicePort
 
 from .actor import Actor
@@ -76,6 +78,11 @@ class Rule(BaseRule, MutableObject):
     dynamic (label, IP list) references. By default, providers and consumers
     are resolved as workloads.
 
+    The action parameter determines the rule behavior:
+    - 'allow': Permits traffic (default)
+    - 'deny': Blocks traffic (equivalent to DenyRule)
+    - 'override_deny': Overrides deny rules (equivalent to OverrideDenyRule)
+
     See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/create-security-policy/rules.htm
 
     Usage:
@@ -103,7 +110,8 @@ class Rule(BaseRule, MutableObject):
         ...         {'port': 80, 'proto': 'tcp'},
         ...         {'port': 443, 'proto': 'tcp'}
         ...     ],
-        ...     unscoped_consumers=True  # creates an extra-scope rule
+        ...     unscoped_consumers=True,  # creates an extra-scope rule
+        ...     action='allow'  # explicit action (default is 'allow')
         ... )
         >>> rule = pce.rules.create(rule, parent=ruleset)
         >>> rule
@@ -146,11 +154,100 @@ class Rule(BaseRule, MutableObject):
     consuming_security_principals: List[Reference] = None
     unscoped_consumers: bool = None
     network_type: str = None
+    action: str = None
 
     @classmethod
     def build(cls, providers: List[Union[str, Reference, dict]], consumers: List[Union[str, Reference, dict]],
             ingress_services: List[Union[JsonObject, dict, str]],
-            resolve_providers_as: List[str]=None, resolve_consumers_as: List[str]=None, enabled=True, **kwargs) -> 'Rule':
+            resolve_providers_as: List[str]=None, resolve_consumers_as: List[str]=None, enabled=True, action='allow', **kwargs) -> 'Rule':
+        # Validate action parameter
+        if action not in RuleAction:
+            raise IllumioException(f"Invalid rule action: {action}. Must be one of {list(RuleAction)}")
+        
+        resolve_labels_as = LabelResolutionBlock(
+            providers=resolve_providers_as or [RESOLVE_AS_WORKLOADS],
+            consumers=resolve_consumers_as or [RESOLVE_AS_WORKLOADS]
+        )
+        return super().build(providers, consumers, ingress_services, resolve_labels_as=resolve_labels_as, enabled=enabled, action=action, **kwargs)
+
+
+@dataclass
+@pce_api('deny_rules', endpoint='/sec_deny_rules')
+class DenyRule(BaseRule, MutableObject):
+    """Represents a deny rule in the PCE.
+
+    Deny rules explicitly block traffic from the defined providers to the 
+    defined consumers on the specified services. They have higher precedence 
+    than allow rules but can be overridden by override deny rules.
+
+    Usage:
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
+        >>> pce.set_credentials('api_key', 'api_secret')
+        >>> external_ip_list = pce.ip_lists.get(name='External-IPs')[0]
+        >>> internal_label = pce.labels.get(key='role', value='internal')[0]
+        >>> deny_rule = illumio.DenyRule.build(
+        ...     providers=[external_ip_list],
+        ...     consumers=[internal_label],
+        ...     ingress_services=[
+        ...         {'port': 22, 'proto': 'tcp'},
+        ...         {'port': 3389, 'proto': 'tcp'}
+        ...     ],
+        ...     priority=100
+        ... )
+        >>> deny_rule = pce.deny_rules.create(deny_rule)
+    """
+    enabled: bool = None
+    resolve_labels_as: LabelResolutionBlock = None
+    priority: int = None
+    name: str = None
+    description: str = None
+
+    @classmethod
+    def build(cls, providers: List[Union[str, Reference, dict]], consumers: List[Union[str, Reference, dict]],
+            ingress_services: List[Union[JsonObject, dict, str]],
+            resolve_providers_as: List[str]=None, resolve_consumers_as: List[str]=None, enabled=True, **kwargs) -> 'DenyRule':
+        resolve_labels_as = LabelResolutionBlock(
+            providers=resolve_providers_as or [RESOLVE_AS_WORKLOADS],
+            consumers=resolve_consumers_as or [RESOLVE_AS_WORKLOADS]
+        )
+        return super().build(providers, consumers, ingress_services, resolve_labels_as=resolve_labels_as, enabled=enabled, **kwargs)
+
+
+@dataclass
+@pce_api('override_deny_rules', endpoint='/sec_override_deny_rules')
+class OverrideDenyRule(BaseRule, MutableObject):
+    """Represents an override deny rule in the PCE.
+
+    Override deny rules allow traffic that would otherwise be blocked by deny 
+    rules. They have the highest precedence in the rule evaluation hierarchy.
+
+    Usage:
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
+        >>> pce.set_credentials('api_key', 'api_secret')
+        >>> admin_label = pce.labels.get(key='role', value='admin')[0]
+        >>> internal_label = pce.labels.get(key='role', value='internal')[0]
+        >>> override_rule = illumio.OverrideDenyRule.build(
+        ...     providers=[admin_label],
+        ...     consumers=[internal_label],
+        ...     ingress_services=[
+        ...         {'port': 22, 'proto': 'tcp'}
+        ...     ],
+        ...     overrides=['/orgs/1/sec_policy/draft/deny_rules/123']
+        ... )
+        >>> override_rule = pce.override_deny_rules.create(override_rule)
+    """
+    enabled: bool = None
+    resolve_labels_as: LabelResolutionBlock = None
+    overrides: List[Reference] = None
+    name: str = None
+    description: str = None
+
+    @classmethod
+    def build(cls, providers: List[Union[str, Reference, dict]], consumers: List[Union[str, Reference, dict]],
+            ingress_services: List[Union[JsonObject, dict, str]],
+            resolve_providers_as: List[str]=None, resolve_consumers_as: List[str]=None, enabled=True, **kwargs) -> 'OverrideDenyRule':
         resolve_labels_as = LabelResolutionBlock(
             providers=resolve_providers_as or [RESOLVE_AS_WORKLOADS],
             consumers=resolve_consumers_as or [RESOLVE_AS_WORKLOADS]
@@ -161,5 +258,7 @@ class Rule(BaseRule, MutableObject):
 __all__ = [
     'BaseRule',
     'Rule',
+    'DenyRule',
+    'OverrideDenyRule',
     'LabelResolutionBlock',
 ]

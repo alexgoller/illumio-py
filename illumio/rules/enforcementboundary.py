@@ -30,6 +30,9 @@ class EnforcementBoundary(BaseRule):
     Rules allowing traffic that would otherwise be denied by an enforcement
     boundary will override the boundary's deny rule.
 
+    Note: For more granular deny rule control, consider using the dedicated
+    DenyRule and OverrideDenyRule classes instead of enforcement boundaries.
+
     See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/policy-enforcement/enforcement-boundaries.htm
 
     Usage:

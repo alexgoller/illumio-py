@@ -30,6 +30,7 @@ from illumio.util import (
     PolicyDecision,
     FlowDirection,
     TrafficState,
+    BoundaryDecision,
     FQDN_REGEX
 )
 from illumio.workloads import Workload
@@ -282,12 +283,15 @@ class TrafficFlow(JsonObject):
     icmp_type: int = None
     icmp_code: int = None
     network: Network = None
+    boundary_decision: str = None
 
     def _validate(self):
         if self.flow_direction and not self.flow_direction in FlowDirection:
             raise IllumioException("Invalid flow_direction: {}".format(self.flow_direction))
         if self.policy_decision and not self.policy_decision in PolicyDecision:
             raise IllumioException("Invalid policy_decision: {}".format(self.policy_decision))
+        if self.boundary_decision and not self.boundary_decision in BoundaryDecision:
+            raise IllumioException("Invalid boundary_decision: {}".format(self.boundary_decision))
         if self.state and not self.state in TrafficState:
             raise IllumioException("Invalid state: {}".format(self.state))
         if self.transmission and not self.transmission in Transmission:
