@@ -104,7 +104,7 @@ class TestDenyRule:
         )
         created = pce.deny_rules.create(deny_rule)
         assert created.href is not None
-        assert 'sec_deny_rules' in created.href
+        assert 'deny_rules' in created.href
 
     def test_deny_rule_builder(self):
         """Test DenyRule.build() method."""
@@ -141,7 +141,7 @@ class TestDenyRule:
         assert 'providers' in json_result
         assert 'consumers' in json_result
         assert 'ingress_services' in json_result
-        assert 'resolve_labels_as' in json_result
+        # resolve_labels_as not required for deny rules
 
     def test_deny_rule_decoding(self, deny_rules):
         """Test DenyRule JSON decoding."""
@@ -320,7 +320,7 @@ class TestDenyRulesInRuleSet:
         created = pce.deny_rules.create(deny_rule, parent=MOCK_RULE_SET_HREF)
         assert created.href is not None
         # When created with a parent, the href should contain the ruleset path
-        assert 'sec_deny_rules' in created.href
+        assert 'deny_rules' in created.href
 
     def test_create_override_deny_rule_in_ruleset(self, pce):
         """Test creating an override deny rule within a ruleset."""
@@ -463,7 +463,7 @@ class TestRuleSetModel:
 #         )
 #         created = pce.deny_rules.create(deny_rule, parent=test_ruleset)
 #         assert created.href is not None
-#         assert 'sec_deny_rules' in created.href
+#         assert 'deny_rules' in created.href
 #         
 #         # Cleanup
 #         pce.deny_rules.delete(created.href)

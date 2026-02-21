@@ -172,7 +172,7 @@ class Rule(BaseRule, MutableObject):
 
 
 @dataclass
-@pce_api('deny_rules', endpoint='/sec_deny_rules')
+@pce_api('deny_rules', endpoint='/deny_rules')
 class DenyRule(BaseRule, MutableObject):
     """Represents a deny rule in the PCE.
 
@@ -206,16 +206,13 @@ class DenyRule(BaseRule, MutableObject):
     @classmethod
     def build(cls, providers: List[Union[str, Reference, dict]], consumers: List[Union[str, Reference, dict]],
             ingress_services: List[Union[JsonObject, dict, str]],
-            resolve_providers_as: List[str]=None, resolve_consumers_as: List[str]=None, enabled=True, **kwargs) -> 'DenyRule':
-        resolve_labels_as = LabelResolutionBlock(
-            providers=resolve_providers_as or [RESOLVE_AS_WORKLOADS],
-            consumers=resolve_consumers_as or [RESOLVE_AS_WORKLOADS]
-        )
-        return super().build(providers, consumers, ingress_services, resolve_labels_as=resolve_labels_as, enabled=enabled, **kwargs)
+            enabled=True, **kwargs) -> 'DenyRule':
+        """Build a deny rule without resolve_labels_as (not supported by API)."""
+        return super().build(providers, consumers, ingress_services, enabled=enabled, **kwargs)
 
 
 @dataclass
-@pce_api('override_deny_rules', endpoint='/sec_override_deny_rules')
+@pce_api('override_deny_rules', endpoint='/override_deny_rules')
 class OverrideDenyRule(BaseRule, MutableObject):
     """Represents an override deny rule in the PCE.
 
