@@ -35,6 +35,8 @@
             ]
         ],
         "rules": [],
+        "deny_rules": [],
+        "override_deny_rules": [],
         "ip_tables_rules": [],
         "caps": [
             "write",
@@ -77,6 +79,8 @@
             ]
         ],
         "rules": [],
+        "deny_rules": [],
+        "override_deny_rules": [],
         "ip_tables_rules": [],
         "caps": [
             "write",
@@ -103,6 +107,108 @@
             []
         ],
         "rules": [],
+        "deny_rules": [],
+        "override_deny_rules": [],
+        "ip_tables_rules": [],
+        "caps": [
+            "write",
+            "provision"
+        ]
+    },
+    {
+        "href": "/orgs/1/sec_policy/draft/rule_sets/3",
+        "created_at": "2024-01-15T10:00:00.000Z",
+        "updated_at": "2024-01-15T10:00:00.000Z",
+        "deleted_at": null,
+        "created_by": {
+            "href": "/users/1"
+        },
+        "updated_by": {
+            "href": "/users/1"
+        },
+        "deleted_by": null,
+        "update_type": null,
+        "name": "RS-WITH-DENY-RULES",
+        "description": "RuleSet containing deny rules",
+        "enabled": true,
+        "scopes": [
+            [
+                {
+                    "label": {
+                        "href": "/orgs/1/labels/1"
+                    }
+                }
+            ]
+        ],
+        "rules": [],
+        "deny_rules": [
+            {
+                "href": "/orgs/1/sec_policy/draft/rule_sets/3/sec_deny_rules/1",
+                "name": "DR-Block-SSH-In-RuleSet",
+                "enabled": true,
+                "priority": 100,
+                "providers": [
+                    {
+                        "ip_list": {
+                            "href": "/orgs/1/sec_policy/draft/ip_lists/1"
+                        }
+                    }
+                ],
+                "consumers": [
+                    {
+                        "label": {
+                            "href": "/orgs/1/labels/1"
+                        }
+                    }
+                ],
+                "ingress_services": [
+                    {
+                        "port": 22,
+                        "proto": 6
+                    }
+                ],
+                "resolve_labels_as": {
+                    "providers": ["workloads"],
+                    "consumers": ["workloads"]
+                }
+            }
+        ],
+        "override_deny_rules": [
+            {
+                "href": "/orgs/1/sec_policy/draft/rule_sets/3/sec_override_deny_rules/1",
+                "name": "ODR-Allow-Admin-In-RuleSet",
+                "enabled": true,
+                "providers": [
+                    {
+                        "label": {
+                            "href": "/orgs/1/labels/10"
+                        }
+                    }
+                ],
+                "consumers": [
+                    {
+                        "label": {
+                            "href": "/orgs/1/labels/1"
+                        }
+                    }
+                ],
+                "ingress_services": [
+                    {
+                        "port": 22,
+                        "proto": 6
+                    }
+                ],
+                "resolve_labels_as": {
+                    "providers": ["workloads"],
+                    "consumers": ["workloads"]
+                },
+                "overrides": [
+                    {
+                        "href": "/orgs/1/sec_policy/draft/rule_sets/3/sec_deny_rules/1"
+                    }
+                ]
+            }
+        ],
         "ip_tables_rules": [],
         "caps": [
             "write",

@@ -14,7 +14,7 @@ from typing import List
 from illumio.util import MutableObject, pce_api
 from illumio.policyobjects import LabelSet
 
-from .rule import Rule
+from .rule import Rule, DenyRule, OverrideDenyRule
 from .iptablesrule import IPTablesRule
 
 
@@ -26,6 +26,12 @@ class RuleSet(MutableObject):
     Rule sets provide scope boundaries for security policy rules. Scopes are
     defined using application, environment, and location labels. Rules within
     the set will default to applying to workloads with these labels.
+
+    Rule sets can contain:
+    - rules: Standard allow rules (sec_rules)
+    - deny_rules: Rules that explicitly block traffic (sec_deny_rules)
+    - override_deny_rules: Rules that override deny rules (sec_override_deny_rules)
+    - ip_tables_rules: Custom IP tables rules
 
     See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/create-security-policy/rulesets.htm
 
@@ -50,10 +56,20 @@ class RuleSet(MutableObject):
             href='/orgs/1/sec_policy/draft/rule_sets/19',
             name='RS-RINGFENCE'
         )
+        >>> # Create a deny rule within the ruleset
+        >>> deny_rule = illumio.DenyRule.build(
+        ...     providers=[external_ip_list],
+        ...     consumers=[internal_label],
+        ...     ingress_services=[{'port': 22, 'proto': 'tcp'}],
+        ...     name='DR-Block-SSH'
+        ... )
+        >>> deny_rule = pce.deny_rules.create(deny_rule, parent=ruleset)
     """
     enabled: bool = None
     scopes: List[LabelSet] = None
     rules: List[Rule] = None
+    deny_rules: List[DenyRule] = None
+    override_deny_rules: List[OverrideDenyRule] = None
     ip_tables_rules: List[IPTablesRule] = None
 
 
