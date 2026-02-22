@@ -46,6 +46,7 @@ class WorkloadServicePort(JsonObject):
 @dataclass
 class WorkloadServices(JsonObject):
     uptime_seconds: int = None
+    created_at: str = None
     open_service_ports: List[WorkloadServicePort] = None
 
 
@@ -63,6 +64,7 @@ class VulnerabilitiesSummary(JsonObject):
     vulnerability_exposure_score: int = None
     vulnerability_score: int = None
     max_vulnerability_score: int = None
+    vulnerability_computation_state: str = None
 
 
 @dataclass
