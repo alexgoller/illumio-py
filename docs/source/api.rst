@@ -95,6 +95,18 @@ Rules
 .. autoclass:: illumio.rules.Rule
     :members: build
 
+Deny Rules
+##########
+
+.. autoclass:: illumio.rules.DenyRule
+    :members: build
+
+Override Deny Rules
+###################
+
+.. autoclass:: illumio.rules.OverrideDenyRule
+    :members: build
+
 Enforcement Boundaries
 ######################
 
@@ -117,6 +129,11 @@ Labels
 .. autoclass:: illumio.policyobjects.Label
 .. autoclass:: illumio.policyobjects.LabelGroup
 .. autoclass:: illumio.policyobjects.LabelSet
+
+Label Dimensions
+################
+
+.. autoclass:: illumio.policyobjects.LabelDimension
 
 Services
 ########
