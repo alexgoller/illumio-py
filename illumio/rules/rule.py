@@ -178,7 +178,10 @@ class DenyRule(BaseRule, MutableObject):
 
     Deny rules explicitly block traffic from the defined providers to the 
     defined consumers on the specified services. They have higher precedence 
-    than allow rules but can be overridden by override deny rules.
+    than allow rules.
+    
+    Set override=True to create an override deny rule, which allows traffic
+    that would otherwise be blocked by deny rules.
 
     Usage:
         >>> import illumio
@@ -202,13 +205,16 @@ class DenyRule(BaseRule, MutableObject):
     priority: int = None
     name: str = None
     description: str = None
+    override: bool = None  # If True, this is an override deny rule
 
     @classmethod
     def build(cls, providers: List[Union[str, Reference, dict]], consumers: List[Union[str, Reference, dict]],
             ingress_services: List[Union[JsonObject, dict, str]],
-            enabled=True, **kwargs) -> 'DenyRule':
-        """Build a deny rule without resolve_labels_as (not supported by API)."""
-        return super().build(providers, consumers, ingress_services, enabled=enabled, **kwargs)
+            enabled=True, override=False, **kwargs) -> 'DenyRule':
+        """Build a deny rule. Set override=True for override deny rules."""
+        rule = super().build(providers, consumers, ingress_services, enabled=enabled, **kwargs)
+        rule.override = override
+        return rule
 
 
 @dataclass
