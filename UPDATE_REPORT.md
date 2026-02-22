@@ -43,11 +43,12 @@ The illumio-py client is reasonably up-to-date with core functionality but has s
 
 ### 🔴 Missing Endpoints (High Priority)
 
-#### 2.1 Label Types API
+#### 2.1 Label Types API ✅ IMPLEMENTED
 - **Endpoint:** `/label_dimensions` (v24.5+)
 - **Description:** Allows defining custom label types beyond Role/App/Env/Loc
-- **Impact:** Cannot create or manage custom label dimensions
-- **Recommendation:** Add `LabelDimension` class and register API
+- **Status:** Implemented in commit `21405fd`
+- **Classes:** `LabelDimension`, `LabelDimensionDisplayInfo`, `LabelDimensionUsage`
+- **Tests:** 19 unit tests added
 
 #### 2.2 Network Enforcement Nodes (NEN)
 - **Endpoint:** `/network_enforcement_nodes`
@@ -143,7 +144,7 @@ FAILED tests/unit/test_unit_rules.py::test_builder
 - [ ] Add VEN operations (unpair, upgrade, restart)
 
 ### Phase 3: New APIs (Medium-term)
-- [ ] Add LabelDimension API
+- [x] Add LabelDimension API ✅ (commit `21405fd`)
 - [ ] Add NetworkEnforcementNode API
 - [ ] Add PCE health endpoint wrapper
 
@@ -184,16 +185,51 @@ class PolicyComputeEngine:
         pass
 ```
 
-### 5.3 Add Label Dimensions
+### 5.3 Add Label Dimensions ✅ IMPLEMENTED
 
 ```python
+@dataclass
+class LabelDimensionDisplayInfo(JsonObject):
+    icon: str = None
+    initial: str = None
+    sort_ordinal: int = None
+    background_color: str = None
+    foreground_color: str = None
+    display_name_plural: str = None
+
 @dataclass
 @pce_api('label_dimensions')
 class LabelDimension(MutableObject):
     """Custom label type definition."""
     key: str = None
     display_name: str = None
-    display_info: dict = None
+    display_info: LabelDimensionDisplayInfo = None
+    usage: LabelDimensionUsage = None
+    caps: List[str] = None
+    external_data_set: str = None
+    external_data_reference: str = None
+    # ... and more
+```
+
+**Usage:**
+```python
+>>> dims = pce.label_dimensions.get()
+>>> for d in dims:
+...     print(f"{d.key}: {d.display_name}")
+role: Role
+app: Application
+bu: Business Unit
+
+>>> new_dim = LabelDimension(
+...     key='tenant',
+...     display_name='Tenant',
+...     display_info=LabelDimensionDisplayInfo(
+...         icon='group',
+...         initial='T',
+...         background_color='#00ff00'
+...     )
+... )
+>>> created = pce.label_dimensions.create(new_dim)
 ```
 
 ---
