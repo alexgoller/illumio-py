@@ -40,6 +40,7 @@ OBJECT_TYPE_REF_MAP = {
     'enforcement_boundaries': _gen_int_id,
     'events': _gen_uuid,
     'ip_lists': _gen_int_id,
+    'label_dimensions': _gen_uuid,
     'label_groups': _gen_uuid,
     'labels': _gen_int_id,
     'pairing_profiles': _gen_int_id,

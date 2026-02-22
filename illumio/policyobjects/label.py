@@ -28,6 +28,93 @@ class LabelUsage(JsonObject):
 
 
 @dataclass
+class LabelDimensionUsage(JsonObject):
+    """Represents usage information for a label dimension."""
+    labels: bool = None
+    label_groups: bool = None
+
+
+@dataclass
+class LabelDimensionDisplayInfo(JsonObject):
+    """Display configuration for a label dimension in the UI.
+
+    Args:
+        icon (str, optional): Icon name (e.g., 'role', 'app', 'env', 'loc', 'group', 'servers').
+        initial (str, optional): Short initial(s) displayed in labels (e.g., 'R', 'A', 'BU').
+        sort_ordinal (int, optional): Sort order in UI (lower = higher priority).
+        background_color (str, optional): Hex color for label background (e.g., '#ce93d8').
+        foreground_color (str, optional): Hex color for label text (e.g., '#ffffff').
+        display_name_plural (str, optional): Plural form of display name.
+    """
+    icon: str = None
+    initial: str = None
+    sort_ordinal: int = None
+    background_color: str = None
+    foreground_color: str = None
+    display_name_plural: str = None
+
+
+@dataclass
+@pce_api('label_dimensions')
+class LabelDimension(MutableObject):
+    """Represents a label dimension (label type) in the PCE.
+
+    Label dimensions define the types of labels available in the PCE.
+    The default dimensions are Role, Application, Environment, and Location,
+    but custom dimensions can be created (e.g., 'Business Unit', 'Tenant').
+
+    Available since PCE v24.5.
+
+    See https://docs.illumio.com/core/24.5/Content/Guides/security-policy/security-policy-objects/labels-and-label-groups.htm
+
+    Usage:
+        >>> import illumio
+        >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
+        >>> pce.set_credentials('api_key', 'api_secret')
+        >>> # List all label dimensions
+        >>> dimensions = pce.label_dimensions.get()
+        >>> for dim in dimensions:
+        ...     print(f"{dim.key}: {dim.display_name}")
+        role: Role
+        app: Application
+        env: Environment
+        loc: Location
+        >>> # Create a custom label dimension
+        >>> dimension = illumio.LabelDimension(
+        ...     key='bu',
+        ...     display_name='Business Unit',
+        ...     display_info=illumio.LabelDimensionDisplayInfo(
+        ...         icon='group',
+        ...         initial='BU',
+        ...         background_color='#ebbb0f',
+        ...         foreground_color='#000000',
+        ...         display_name_plural='Business Units'
+        ...     )
+        ... )
+        >>> dimension = pce.label_dimensions.create(dimension)
+        >>> dimension
+        LabelDimension(
+            href='/orgs/1/label_dimensions/...',
+            key='bu',
+            display_name='Business Unit',
+            ...
+        )
+    """
+    key: str = None
+    display_name: str = None
+    display_info: LabelDimensionDisplayInfo = None
+    deleted: bool = None
+    deleted_at: str = None
+    usage: LabelDimensionUsage = None
+    caps: List[str] = None
+    external_data_set: str = None
+    external_data_reference: str = None
+    created_by: Reference = None
+    updated_by: Reference = None
+    deleted_by: Reference = None
+
+
+@dataclass
 @pce_api('labels')
 class Label(MutableObject):
     """Represents a label in the PCE.
@@ -136,4 +223,7 @@ __all__ = [
     'Label',
     'LabelGroup',
     'LabelSet',
+    'LabelDimensionUsage',
+    'LabelDimensionDisplayInfo',
+    'LabelDimension',
 ]

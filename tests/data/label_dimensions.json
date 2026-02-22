@@ -1,0 +1,83 @@
+[
+  {
+    "href": "/orgs/1/label_dimensions/6bd4bdbf-6fad-43a3-b75f-da3d385bcb62",
+    "key": "role",
+    "display_name": "Role",
+    "created_at": "2024-08-06T21:42:14.752Z",
+    "updated_at": "2024-08-21T14:33:58.862Z",
+    "display_info": {
+      "icon": "role",
+      "initial": "R",
+      "sort_ordinal": 1000000,
+      "background_color": "#ce93d8",
+      "foreground_color": "#ffffff",
+      "display_name_plural": "Roles"
+    },
+    "deleted": false,
+    "deleted_at": null,
+    "usage": {
+      "labels": true,
+      "label_groups": false
+    },
+    "caps": ["write"],
+    "external_data_set": "defaults.illumio.com",
+    "external_data_reference": "role",
+    "created_by": {"href": "/users/0"},
+    "updated_by": {"href": "/users/1"},
+    "deleted_by": null
+  },
+  {
+    "href": "/orgs/1/label_dimensions/f4ced277-578d-47e0-89ac-3e74d010e600",
+    "key": "app",
+    "display_name": "Application",
+    "created_at": "2024-08-06T21:42:14.760Z",
+    "updated_at": "2024-08-21T14:33:58.865Z",
+    "display_info": {
+      "icon": "app",
+      "initial": "A",
+      "sort_ordinal": 2000000,
+      "background_color": "#42a5f5",
+      "foreground_color": "#ffffff",
+      "display_name_plural": "Applications"
+    },
+    "deleted": false,
+    "deleted_at": null,
+    "usage": {
+      "labels": true,
+      "label_groups": true
+    },
+    "caps": ["write"],
+    "external_data_set": "defaults.illumio.com",
+    "external_data_reference": "app",
+    "created_by": {"href": "/users/0"},
+    "updated_by": {"href": "/users/1"},
+    "deleted_by": null
+  },
+  {
+    "href": "/orgs/1/label_dimensions/d99389c9-f501-4d0f-951c-1d546c140905",
+    "key": "bu",
+    "display_name": "Business Unit",
+    "created_at": "2024-08-06T21:45:03.829Z",
+    "updated_at": "2024-10-25T10:32:05.073Z",
+    "display_info": {
+      "icon": "group",
+      "initial": "BU",
+      "sort_ordinal": 5000000,
+      "background_color": "#ebbb0f",
+      "foreground_color": "#000000",
+      "display_name_plural": "Business Units"
+    },
+    "deleted": false,
+    "deleted_at": null,
+    "usage": {
+      "labels": true,
+      "label_groups": false
+    },
+    "caps": ["write", "delete"],
+    "external_data_set": "",
+    "external_data_reference": "",
+    "created_by": {"href": "/users/1"},
+    "updated_by": {"href": "/users/1"},
+    "deleted_by": null
+  }
+]
