@@ -9,5 +9,8 @@ License:
     Apache2, see LICENSE for more details.
 """
 from .containercluster import *
-from .network import *
-from .secureconnectgateway import *
+from .networkdevice import *
+from .networkenforcementnode import *
+from .slb import *
+from .discoveredvirtualserver import *
+from .kubernetesworkload import *

@@ -31,7 +31,7 @@ from requests import Session, Response
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from .secpolicy import PolicyChangeset, PolicyVersion
+from .secpolicy import PolicyChangeset, PolicyVersion, PolicyDependency, PolicyCheck, ModifiedObject
 from .exceptions import IllumioApiException
 from .policyobjects import IPList, Service
 from .explorer import TrafficQuery, TrafficFlow
@@ -998,6 +998,837 @@ class PolicyComputeEngine:
         }
         response = self.post('/sec_policy', **{**kwargs, **{'include_org': True}})
         return PolicyVersion.from_json(response.json())
+
+    # ---- Batch 2: Security Policy Operations ----
+
+    def get_pending_policy_changes(self, **kwargs) -> list:
+        """Retrieves pending (unprovisioned) policy changes.
+
+        Returns:
+            list: list of pending policy change objects.
+        """
+        response = self.get('/sec_policy/pending', **{**kwargs, **{'include_org': True}})
+        return response.json()
+
+    def discard_pending_policy_changes(self, **kwargs) -> None:
+        """Discards all pending (unprovisioned) policy changes."""
+        self.delete('/sec_policy/pending', **{**kwargs, **{'include_org': True}})
+
+    def get_policy_dependencies(self, hrefs: List[str], policy_version: str = DRAFT, **kwargs) -> list:
+        """Gets dependencies for the given policy object HREFs.
+
+        Args:
+            hrefs: list of HREFs to check dependencies for.
+            policy_version: 'draft' or 'active'.
+
+        Returns:
+            list: dependency objects.
+        """
+        kwargs['json'] = [{'href': h} for h in hrefs]
+        response = self.post(
+            '/sec_policy/{}/dependencies'.format(policy_version),
+            **{**kwargs, **{'include_org': True}}
+        )
+        return [PolicyDependency.from_json(d) for d in response.json()]
+
+    def get_modified_policy_objects(self, policy_version: str = DRAFT, **kwargs) -> list:
+        """Gets policy objects modified since last provisioning.
+
+        Args:
+            policy_version: 'draft' or 'active'.
+
+        Returns:
+            list: modified object records.
+        """
+        response = self.get(
+            '/sec_policy/{}/modified_objects'.format(policy_version),
+            **{**kwargs, **{'include_org': True}}
+        )
+        return [ModifiedObject.from_json(o) for o in response.json()]
+
+    def check_policy(self, policy_version: str = DRAFT, **kwargs) -> PolicyCheck:
+        """Runs a policy check on the given policy version.
+
+        Args:
+            policy_version: 'draft' or 'active'.
+
+        Returns:
+            PolicyCheck: policy check result.
+        """
+        response = self.get(
+            '/sec_policy/{}/policy_check'.format(policy_version),
+            **{**kwargs, **{'include_org': True}}
+        )
+        return PolicyCheck.from_json(response.json())
+
+    def get_policy_allow(self, policy_version: str = ACTIVE, **kwargs) -> dict:
+        """Gets the allowed policy for the given version.
+
+        Args:
+            policy_version: 'draft' or 'active'.
+
+        Returns:
+            dict: allowed policy data.
+        """
+        response = self.get(
+            '/sec_policy/{}/allow'.format(policy_version),
+            **{**kwargs, **{'include_org': True}}
+        )
+        return response.json()
+
+    def analyze_policy_impact(self, hrefs: List[str], **kwargs) -> dict:
+        """Analyzes the impact of provisioning the given policy objects.
+
+        Args:
+            hrefs: HREFs of policy objects to analyze.
+
+        Returns:
+            dict: impact analysis result.
+        """
+        kwargs['json'] = [{'href': h} for h in hrefs]
+        response = self.post('/sec_policy/impact', **{**kwargs, **{'include_org': True}})
+        return response.json()
+
+    def restore_policy(self, policy_version: str = DRAFT, **kwargs) -> dict:
+        """Restores the given policy version.
+
+        Args:
+            policy_version: the policy version to restore.
+
+        Returns:
+            dict: restore result.
+        """
+        response = self.post(
+            '/sec_policy/{}/restore'.format(policy_version),
+            **{**kwargs, **{'include_org': True, 'json': {}}}
+        )
+        return response.json()
+
+    def bulk_delete_policy_objects(self, hrefs: List[str], **kwargs) -> None:
+        """Bulk deletes security policy objects.
+
+        Args:
+            hrefs: HREFs of policy objects to delete.
+        """
+        kwargs['json'] = [{'href': h} for h in hrefs]
+        self.put('/sec_policy/delete', **{**kwargs, **{'include_org': True}})
+
+    def search_rules(self, query: dict, policy_version: str = DRAFT, **kwargs) -> list:
+        """Searches for rules matching the given query.
+
+        Args:
+            query: search criteria.
+            policy_version: 'draft' or 'active'.
+
+        Returns:
+            list: matching rule objects.
+        """
+        kwargs['json'] = query
+        response = self.post(
+            '/sec_policy/{}/rule_search'.format(policy_version),
+            **{**kwargs, **{'include_org': True}}
+        )
+        return response.json()
+
+    # ---- Batch 3: Access Management & Authentication ----
+
+    def create_service_account_api_key(self, sa_href: str, **kwargs) -> dict:
+        """Creates an API key for a service account.
+
+        Args:
+            sa_href: HREF of the service account.
+
+        Returns:
+            dict: created API key data including key_id and secret.
+        """
+        response = self.post(
+            '{}/api_keys'.format(sa_href),
+            **{**kwargs, **{'json': {}, 'include_org': False}}
+        )
+        return response.json()
+
+    def delete_service_account_api_key(self, sa_href: str, key_id: str, **kwargs) -> None:
+        """Deletes an API key for a service account.
+
+        Args:
+            sa_href: HREF of the service account.
+            key_id: ID of the API key to delete.
+        """
+        self.delete(
+            '{}/api_keys/{}'.format(sa_href, key_id),
+            **{**kwargs, **{'include_org': False}}
+        )
+
+    def get_user_api_keys(self, user_id: str, **kwargs) -> list:
+        """Gets API keys for a user.
+
+        Args:
+            user_id: user ID.
+
+        Returns:
+            list: API key objects.
+        """
+        response = self.get(
+            '/users/{}/api_keys'.format(user_id),
+            **{**kwargs, **{'include_org': False}}
+        )
+        return response.json()
+
+    def create_user_api_key(self, user_id: str, **kwargs) -> dict:
+        """Creates an API key for a user.
+
+        Args:
+            user_id: user ID.
+
+        Returns:
+            dict: created API key data.
+        """
+        response = self.post(
+            '/users/{}/api_keys'.format(user_id),
+            **{**kwargs, **{'json': {}, 'include_org': False}}
+        )
+        return response.json()
+
+    def delete_user_api_key(self, user_id: str, key_id: str, **kwargs) -> None:
+        """Deletes an API key for a user.
+
+        Args:
+            user_id: user ID.
+            key_id: API key ID.
+        """
+        self.delete(
+            '/users/{}/api_keys/{}'.format(user_id, key_id),
+            **{**kwargs, **{'include_org': False}}
+        )
+
+    def get_org_api_keys(self, **kwargs) -> list:
+        """Gets all API keys in the organization.
+
+        Returns:
+            list: API key objects.
+        """
+        response = self.get('/api_keys', **{**kwargs, **{'include_org': True}})
+        return response.json()
+
+    def delete_org_api_key(self, key_id: str, **kwargs) -> None:
+        """Deletes an API key in the organization.
+
+        Args:
+            key_id: API key ID.
+        """
+        self.delete('/api_keys/{}'.format(key_id), **{**kwargs, **{'include_org': True}})
+
+    def verify_ldap_connection(self, ldap_href: str, **kwargs) -> dict:
+        """Verifies connectivity to an LDAP server.
+
+        Args:
+            ldap_href: HREF of the LDAP config.
+
+        Returns:
+            dict: verification result.
+        """
+        response = self.post(
+            '{}/verify_connection'.format(ldap_href),
+            **{**kwargs, **{'json': {}, 'include_org': False}}
+        )
+        return response.json()
+
+    def login_user(self, username: str, password: str, **kwargs) -> dict:
+        """Authenticates a user.
+
+        Args:
+            username: login username.
+            password: login password.
+
+        Returns:
+            dict: authentication result with session token.
+        """
+        kwargs['json'] = {'username': username, 'password': password}
+        response = self.post(
+            '/login_users/authenticate',
+            **{**kwargs, **{'include_org': False}}
+        )
+        return response.json()
+
+    # ---- Batch 4: Infrastructure & Network ----
+
+    def request_enforcement_instructions(self, device_href: str, **kwargs) -> dict:
+        """Requests enforcement instructions for a network device.
+
+        Args:
+            device_href: HREF of the network device.
+
+        Returns:
+            dict: enforcement instructions.
+        """
+        response = self.post(
+            '{}/enforcement_instructions_request'.format(device_href),
+            **{**kwargs, **{'json': {}, 'include_org': False}}
+        )
+        return response.json()
+
+    def apply_enforcement_instructions(self, device_href: str, data: dict, **kwargs) -> dict:
+        """Reports applied enforcement instructions for a network device.
+
+        Args:
+            device_href: HREF of the network device.
+            data: applied enforcement data.
+
+        Returns:
+            dict: response data.
+        """
+        kwargs['json'] = data
+        response = self.post(
+            '{}/enforcement_instructions_applied'.format(device_href),
+            **{**kwargs, **{'include_org': False}}
+        )
+        return response.json()
+
+    def multi_enforcement_instructions_request(self, data: dict, **kwargs) -> dict:
+        """Requests enforcement instructions for multiple network devices.
+
+        Args:
+            data: request data.
+
+        Returns:
+            dict: enforcement instructions.
+        """
+        kwargs['json'] = data
+        response = self.post(
+            '/network_devices/multi_enforcement_instructions_request',
+            **{**kwargs, **{'include_org': True}}
+        )
+        return response.json()
+
+    def multi_enforcement_instructions_applied(self, data: dict, **kwargs) -> dict:
+        """Reports applied enforcement instructions for multiple network devices.
+
+        Args:
+            data: applied enforcement data.
+
+        Returns:
+            dict: response data.
+        """
+        kwargs['json'] = data
+        response = self.post(
+            '/network_devices/multi_enforcement_instructions_applied',
+            **{**kwargs, **{'include_org': True}}
+        )
+        return response.json()
+
+    def get_container_service_backends(self, cluster_href: str, **kwargs) -> list:
+        """Gets service backends for a container cluster.
+
+        Args:
+            cluster_href: HREF of the container cluster.
+
+        Returns:
+            list: service backend objects.
+        """
+        response = self.get(
+            '{}/service_backends'.format(cluster_href),
+            **{**kwargs, **{'include_org': False}}
+        )
+        return response.json()
+
+    # ---- Batch 5: Reporting ----
+
+    def download_report(self, report_href: str, **kwargs) -> bytes:
+        """Downloads a completed report.
+
+        Args:
+            report_href: HREF of the report.
+
+        Returns:
+            bytes: report file content.
+        """
+        response = self.get(
+            '{}/download'.format(report_href),
+            **{**kwargs, **{'include_org': False}}
+        )
+        return response.content
+
+    def get_risk_summary(self, **kwargs) -> dict:
+        """Gets the risk summary report.
+
+        Returns:
+            dict: risk summary data.
+        """
+        response = self.get('/reports/risk_summary', **{**kwargs, **{'include_org': True}})
+        return response.json()
+
+    def get_detected_core_services_summary(self, **kwargs) -> dict:
+        """Gets a summary of detected core services.
+
+        Returns:
+            dict: core services summary.
+        """
+        response = self.get('/detected_core_services_summary', **{**kwargs, **{'include_org': True}})
+        return response.json()
+
+    # ---- Batch 7: VEN/Workload Actions ----
+
+    def unpair_vens(self, ven_hrefs: List[str], firewall_restore: str = 'default', **kwargs) -> list:
+        """Unpairs VENs from the PCE.
+
+        Args:
+            ven_hrefs: HREFs of VENs to unpair.
+            firewall_restore: firewall restore mode.
+
+        Returns:
+            list: unpair results.
+        """
+        kwargs['json'] = {
+            'vens': [{'href': h} for h in ven_hrefs],
+            'firewall_restore': firewall_restore
+        }
+        response = self.put('/vens/unpair', **{**kwargs, **{'include_org': True}})
+        return response.json()
+
+    def upgrade_vens(self, ven_hrefs: List[str], release: str, **kwargs) -> list:
+        """Upgrades VENs to the specified release.
+
+        Args:
+            ven_hrefs: HREFs of VENs to upgrade.
+            release: target release version.
+
+        Returns:
+            list: upgrade results.
+        """
+        kwargs['json'] = {
+            'vens': [{'href': h} for h in ven_hrefs],
+            'release': release
+        }
+        response = self.put('/vens/upgrade', **{**kwargs, **{'include_org': True}})
+        return response.json()
+
+    def ven_remote_action(self, ven_hrefs: List[str], action: str, **kwargs) -> list:
+        """Performs a remote action on VENs.
+
+        Args:
+            ven_hrefs: HREFs of VENs to act on.
+            action: the remote action to perform.
+
+        Returns:
+            list: action results.
+        """
+        kwargs['json'] = {
+            'vens': [{'href': h} for h in ven_hrefs],
+            'action': action
+        }
+        response = self.put('/vens/remote_action', **{**kwargs, **{'include_org': True}})
+        return response.json()
+
+    def ven_auth_recovery(self, ven_hrefs: List[str], **kwargs) -> list:
+        """Initiates authentication recovery for VENs.
+
+        Args:
+            ven_hrefs: HREFs of VENs.
+
+        Returns:
+            list: recovery results.
+        """
+        kwargs['json'] = {'vens': [{'href': h} for h in ven_hrefs]}
+        response = self.put('/vens/authentication_recovery', **{**kwargs, **{'include_org': True}})
+        return response.json()
+
+    def get_ven_statistics(self, ven_hrefs: List[str], **kwargs) -> dict:
+        """Gets statistics for VENs.
+
+        Args:
+            ven_hrefs: HREFs of VENs.
+
+        Returns:
+            dict: VEN statistics.
+        """
+        kwargs['json'] = {'vens': [{'href': h} for h in ven_hrefs]}
+        response = self.post('/vens/statistics', **{**kwargs, **{'include_org': True}})
+        return response.json()
+
+    def get_workload_interfaces(self, workload_href: str, **kwargs) -> list:
+        """Gets network interfaces for a workload.
+
+        Args:
+            workload_href: HREF of the workload.
+
+        Returns:
+            list: interface objects.
+        """
+        response = self.get(
+            '{}/interfaces'.format(workload_href),
+            **{**kwargs, **{'include_org': False}}
+        )
+        return response.json()
+
+    def create_workload_interface(self, workload_href: str, interface: Any, **kwargs) -> dict:
+        """Creates a network interface on a workload.
+
+        Args:
+            workload_href: HREF of the workload.
+            interface: interface data.
+
+        Returns:
+            dict: created interface.
+        """
+        kwargs['json'] = interface
+        response = self.post(
+            '{}/interfaces'.format(workload_href),
+            **{**kwargs, **{'include_org': False}}
+        )
+        return response.json()
+
+    def delete_workload_interface(self, workload_href: str, iface_name: str, **kwargs) -> None:
+        """Deletes a network interface from a workload.
+
+        Args:
+            workload_href: HREF of the workload.
+            iface_name: name of the interface.
+        """
+        self.delete(
+            '{}/interfaces/{}'.format(workload_href, iface_name),
+            **{**kwargs, **{'include_org': False}}
+        )
+
+    def get_workload_risk_details(self, workload_href: str, **kwargs) -> dict:
+        """Gets risk details for a workload.
+
+        Args:
+            workload_href: HREF of the workload.
+
+        Returns:
+            dict: risk detail data.
+        """
+        response = self.get(
+            '{}/risk_details'.format(workload_href),
+            **{**kwargs, **{'include_org': False}}
+        )
+        return response.json()
+
+    def unpair_workloads(self, workload_hrefs: List[str], firewall_restore: str = 'default', **kwargs) -> list:
+        """Unpairs workloads from the PCE.
+
+        Args:
+            workload_hrefs: HREFs of workloads to unpair.
+            firewall_restore: firewall restore mode.
+
+        Returns:
+            list: unpair results.
+        """
+        kwargs['json'] = {
+            'workloads': [{'href': h} for h in workload_hrefs],
+            'firewall_restore': firewall_restore
+        }
+        response = self.put('/workloads/unpair', **{**kwargs, **{'include_org': True}})
+        return response.json()
+
+    def bulk_import_workloads(self, data: list, **kwargs) -> list:
+        """Bulk imports workloads.
+
+        Args:
+            data: list of workload data to import.
+
+        Returns:
+            list: import results.
+        """
+        kwargs['json'] = data
+        response = self.put('/workloads/bulk_import', **{**kwargs, **{'include_org': True}})
+        return response.json()
+
+    def get_label_group_all_labels(self, lg_href: str, **kwargs) -> list:
+        """Gets all labels (recursively) in a label group.
+
+        Args:
+            lg_href: HREF of the label group.
+
+        Returns:
+            list: label objects.
+        """
+        response = self.get(
+            '{}/all_labels'.format(lg_href),
+            **{**kwargs, **{'include_org': False}}
+        )
+        return response.json()
+
+    def get_label_group_member_of(self, lg_href: str, **kwargs) -> list:
+        """Gets label groups that contain the given label group.
+
+        Args:
+            lg_href: HREF of the label group.
+
+        Returns:
+            list: parent label group references.
+        """
+        response = self.get(
+            '{}/member_of'.format(lg_href),
+            **{**kwargs, **{'include_org': False}}
+        )
+        return response.json()
+
+    # ---- Batch 8: Label Mapping & Misc ----
+
+    def reorder_label_mapping_rule(self, rule_href: str, position: int, **kwargs) -> None:
+        """Reorders a label mapping rule.
+
+        Args:
+            rule_href: HREF of the rule.
+            position: new position in the ordering.
+        """
+        kwargs['json'] = {'position': position}
+        self.put(
+            '{}/reorder'.format(rule_href),
+            **{**kwargs, **{'include_org': False}}
+        )
+
+    def bulk_delete_label_mapping_rules(self, hrefs: List[str], **kwargs) -> None:
+        """Bulk deletes label mapping rules.
+
+        Args:
+            hrefs: HREFs of rules to delete.
+        """
+        kwargs['json'] = [{'href': h} for h in hrefs]
+        self.put('/label_mapping_rules/delete', **{**kwargs, **{'include_org': True}})
+
+    def bulk_update_label_mapping_rules(self, rules: list, **kwargs) -> list:
+        """Bulk updates label mapping rules.
+
+        Args:
+            rules: list of rule update objects.
+
+        Returns:
+            list: update results.
+        """
+        kwargs['json'] = rules
+        response = self.put('/label_mapping_rules/update', **{**kwargs, **{'include_org': True}})
+        return response.json()
+
+    def run_label_mapping_rules(self, data: dict, **kwargs) -> dict:
+        """Runs label mapping rules.
+
+        Args:
+            data: run parameters.
+
+        Returns:
+            dict: job information.
+        """
+        kwargs['json'] = data
+        response = self.post('/label_mapping_rules/run', **{**kwargs, **{'include_org': True}})
+        return response.json()
+
+    def get_label_mapping_job(self, job_uuid: str, **kwargs) -> dict:
+        """Gets the status of a label mapping job.
+
+        Args:
+            job_uuid: UUID of the job.
+
+        Returns:
+            dict: job status.
+        """
+        response = self.get(
+            '/label_mapping_rules/run/{}'.format(job_uuid),
+            **{**kwargs, **{'include_org': True}}
+        )
+        return response.json()
+
+    def assign_label_mapping_labels(self, job_uuid: str, data: dict, **kwargs) -> None:
+        """Assigns labels from a completed label mapping job.
+
+        Args:
+            job_uuid: UUID of the completed job.
+            data: assignment data.
+        """
+        kwargs['json'] = data
+        self.put(
+            '/label_mapping_rules/run/{}/assign_labels'.format(job_uuid),
+            **{**kwargs, **{'include_org': True}}
+        )
+
+    def download_label_mapping_results(self, job_uuid: str, **kwargs) -> bytes:
+        """Downloads label mapping results.
+
+        Args:
+            job_uuid: UUID of the completed job.
+
+        Returns:
+            bytes: result file content.
+        """
+        response = self.get(
+            '/label_mapping_rules/run/{}/download'.format(job_uuid),
+            **{**kwargs, **{'include_org': True}}
+        )
+        return response.content
+
+    def get_product_version(self, **kwargs) -> dict:
+        """Gets the PCE product version.
+
+        Returns:
+            dict: product version information.
+        """
+        response = self.get('/product_version', **{**kwargs, **{'include_org': False}})
+        return response.json()
+
+    def get_node_available(self, **kwargs) -> dict:
+        """Checks if the PCE node is available.
+
+        Returns:
+            dict: node availability status.
+        """
+        response = self.get('/node_available', **{**kwargs, **{'include_org': False}})
+        return response.json()
+
+    def get_supercluster_leader(self, **kwargs) -> dict:
+        """Gets the supercluster leader node.
+
+        Returns:
+            dict: leader node information.
+        """
+        response = self.get('/supercluster/leader', **{**kwargs, **{'include_org': False}})
+        return response.json()
+
+    def get_app_group_risk_summary(self, **kwargs) -> dict:
+        """Gets the app group risk summary.
+
+        Returns:
+            dict: app group risk summary data.
+        """
+        response = self.get('/app_groups/risk_summary', **{**kwargs, **{'include_org': True}})
+        return response.json()
+
+    def get_app_group_risk_details(self, app_group_id: str, **kwargs) -> dict:
+        """Gets risk details for an app group.
+
+        Args:
+            app_group_id: app group ID.
+
+        Returns:
+            dict: risk detail data.
+        """
+        response = self.get(
+            '/app_groups/{}/risk_details'.format(app_group_id),
+            **{**kwargs, **{'include_org': True}}
+        )
+        return response.json()
+
+    def get_traffic_flow_db_metrics(self, **kwargs) -> dict:
+        """Gets traffic flow database metrics.
+
+        Returns:
+            dict: database metrics.
+        """
+        response = self.get(
+            '/traffic_flows/database_metrics',
+            **{**kwargs, **{'include_org': True}}
+        )
+        return response.json()
+
+    def get_async_queries(self, **kwargs) -> list:
+        """Gets all async traffic flow queries.
+
+        Returns:
+            list: async query objects.
+        """
+        response = self.get(
+            '/traffic_flows/async_queries',
+            **{**kwargs, **{'include_org': True}}
+        )
+        return response.json()
+
+    def delete_async_query(self, uuid: str, **kwargs) -> None:
+        """Deletes an async traffic flow query.
+
+        Args:
+            uuid: UUID of the query.
+        """
+        self.delete(
+            '/traffic_flows/async_queries/{}'.format(uuid),
+            **{**kwargs, **{'include_org': True}}
+        )
+
+    def download_async_query(self, uuid: str, **kwargs) -> bytes:
+        """Downloads results of an async traffic flow query.
+
+        Args:
+            uuid: UUID of the query.
+
+        Returns:
+            bytes: query result content.
+        """
+        response = self.get(
+            '/traffic_flows/async_queries/{}/download'.format(uuid),
+            **{**kwargs, **{'include_org': True}}
+        )
+        return response.content
+
+    def update_async_query_rules(self, uuid: str, data: dict, **kwargs) -> None:
+        """Updates rules for an async traffic flow query.
+
+        Args:
+            uuid: UUID of the query.
+            data: rule update data.
+        """
+        kwargs['json'] = data
+        self.put(
+            '/traffic_flows/async_queries/{}/update_rules'.format(uuid),
+            **{**kwargs, **{'include_org': True}}
+        )
+
+    def get_ven_software_releases(self, **kwargs) -> list:
+        """Gets available VEN software releases.
+
+        Returns:
+            list: VEN release objects.
+        """
+        response = self.get('/software/ven/releases', **{**kwargs, **{'include_org': True}})
+        return response.json()
+
+    def get_ven_software_release(self, release: str, **kwargs) -> dict:
+        """Gets a specific VEN software release.
+
+        Args:
+            release: release version string.
+
+        Returns:
+            dict: release details.
+        """
+        response = self.get(
+            '/software/ven/releases/{}'.format(release),
+            **{**kwargs, **{'include_org': True}}
+        )
+        return response.json()
+
+    def delete_ven_software_release(self, release: str, **kwargs) -> None:
+        """Deletes a VEN software release.
+
+        Args:
+            release: release version string.
+        """
+        self.delete(
+            '/software/ven/releases/{}'.format(release),
+            **{**kwargs, **{'include_org': True}}
+        )
+
+    def set_default_ven_release(self, release: str, **kwargs) -> None:
+        """Sets the default VEN software release.
+
+        Args:
+            release: release version string.
+        """
+        kwargs['json'] = {'release': release}
+        self.put('/software/ven/releases/default', **{**kwargs, **{'include_org': True}})
+
+    def get_ven_release_images(self, release: str, **kwargs) -> list:
+        """Gets images for a VEN software release.
+
+        Args:
+            release: release version string.
+
+        Returns:
+            list: image objects.
+        """
+        response = self.get(
+            '/software/ven/releases/{}/images'.format(release),
+            **{**kwargs, **{'include_org': True}}
+        )
+        return response.json()
 
 
 __all__ = ['PolicyComputeEngine']

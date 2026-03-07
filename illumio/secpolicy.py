@@ -18,13 +18,20 @@ from .util import (
     Reference,
     MutableObject,
     ImmutableObject,
-    HREF_REGEX
+    HREF_REGEX,
+    pce_api
 )
 from .policyobjects import LabelSet
 
 
 @dataclass
+@pce_api('firewall_settings', is_sec_policy=True)
 class FirewallSetting(MutableObject):
+    """Represents firewall settings in the PCE.
+
+    Firewall settings are singleton objects under security policy.
+    They support GET and PUT only (no create/delete).
+    """
     allow_dhcp_client: bool = None
     log_dropped_multicast: bool = None
     log_dropped_broadcast: bool = None
@@ -88,9 +95,40 @@ class PolicyVersion(ImmutableObject):
     object_counts: PolicyObjectCounts = None
 
 
+@dataclass
+class PolicyDependency(JsonObject):
+    """Represents a dependency between security policy objects."""
+    href: str = None
+    type: str = None
+    name: str = None
+    dependent_type: str = None
+    dependent_href: str = None
+    dependent_name: str = None
+
+
+@dataclass
+class PolicyCheck(JsonObject):
+    """Represents the result of a policy check."""
+    status: str = None
+    errors: List[dict] = None
+    warnings: List[dict] = None
+
+
+@dataclass
+class ModifiedObject(JsonObject):
+    """Represents a modified policy object pending provisioning."""
+    href: str = None
+    token: str = None
+    name: str = None
+    change_type: str = None
+
+
 __all__ = [
     'FirewallSetting',
     'PolicyVersion',
     'PolicyObjectCounts',
-    'PolicyChangeset'
+    'PolicyChangeset',
+    'PolicyDependency',
+    'PolicyCheck',
+    'ModifiedObject',
 ]

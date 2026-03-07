@@ -9,6 +9,7 @@ License:
     Apache2, see LICENSE for more details.
 """
 from dataclasses import dataclass
+from typing import List
 
 from illumio.util import IllumioObject, pce_api
 
@@ -24,7 +25,7 @@ class User(IllumioObject):
     full_name: str = None
     time_zone: str = None
     locked: bool = None
-    effective_groups: list = None
+    effective_groups: List[str] = None
     local_profile: dict = None
     type: str = None
     presence_status: str = None

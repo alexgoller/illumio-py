@@ -13,12 +13,16 @@ from .exceptions import *
 from .secpolicy import *
 from .util import *
 from .accessmanagement import *
+from .authentication import *
 from .policyobjects import *
 from .infrastructure import *
 from .vulnerabilities import *
 from .workloads import *
 from .rules import *
 from .explorer import *
+from .reporting import *
+from .settings import *
+from .labelmapping import *
 from .pce import *
 from .appgroups import *
 

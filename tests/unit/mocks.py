@@ -34,28 +34,64 @@ def _gen_int_id():
 
 
 OBJECT_TYPE_REF_MAP = {
+    'access_restrictions': _gen_int_id,
+    'agents': _gen_int_id,
     'app_group_summary': _gen_uuid,
+    'authentication_settings': _gen_uuid,
+    'auth_security_principals': _gen_uuid,
     'container_clusters': _gen_uuid,
     'container_workload_profiles': _gen_uuid,
+    'core_service_types': _gen_int_id,
+    'detected_core_services': _gen_int_id,
     'enforcement_boundaries': _gen_int_id,
     'events': _gen_uuid,
+    'firewall_settings': _gen_int_id,
     'ip_lists': _gen_int_id,
+    'jobs': _gen_uuid,
     'label_dimensions': _gen_uuid,
     'label_groups': _gen_uuid,
+    'label_mapping_rules': _gen_int_id,
     'labels': _gen_int_id,
+    'destinations': _gen_int_id,
+    'discovered_virtual_servers': _gen_uuid,
+    'events': _gen_uuid,
+    'kubernetes_workloads': _gen_uuid,
+    'ldap_configs': _gen_uuid,
+    'network_devices': _gen_uuid,
+    'network_endpoints': _gen_uuid,
+    'network_enforcement_nodes': _gen_uuid,
+    'optional_features': _gen_int_id,
     'pairing_profiles': _gen_int_id,
+    'password_policy': _gen_int_id,
+    'permissions': _gen_uuid,
+    'report_schedules': _gen_uuid,
+    'report_templates': _gen_uuid,
+    'reports': _gen_uuid,
+    'roles': _gen_uuid,
     'rule_sets': _gen_int_id,
-    'sec_rules': _gen_int_id,
+    'saml_configs': _gen_uuid,
     'sec_deny_rules': _gen_int_id,
     'sec_override_deny_rules': _gen_int_id,
+    'sec_rules': _gen_int_id,
     'deny_rules': _gen_int_id,
     'override_deny_rules': _gen_int_id,
     'security_principals': _gen_sid,
+    'service_accounts': _gen_uuid,
     'service_bindings': _gen_int_id,
     'services': _gen_int_id,
+    'settings': _gen_int_id,
+    'slbs': _gen_uuid,
+    'support_bundle_requests': _gen_uuid,
+    'system_events': _gen_uuid,
+    'syslog_destinations': _gen_int_id,
+    'traffic_collector': _gen_int_id,
+    'trusted_proxy_ips': _gen_int_id,
     'users': _gen_int_id,
     'vens': _gen_uuid,
+    'virtual_servers': _gen_uuid,
     'virtual_services': _gen_uuid,
+    'vulnerabilities': _gen_uuid,
+    'vulnerability_reports': _gen_uuid,
     'workloads': _gen_uuid
 }
 
@@ -65,7 +101,7 @@ class PCEObjectMock(object):
     Base class for PCE object mocks
     """
     base_pattern = r'^/api/v2(?:/orgs/\d+)?(?:/sec_policy/(?:draft|active))?/([a-zA-Z_\-]+)'
-    href_pattern = r'^/api/v2((?:/orgs/\d+)?(?:/sec_policy/(?:draft|active))?(?:/[a-zA-Z_\-]+/[a-zA-Z0-9\-]+)+)$'
+    href_pattern = r'^/api/v2((?:/orgs/\d+)?(?:/sec_policy/(?:draft|active))?/[a-zA-Z_\-]+(?:/[a-zA-Z0-9_\-]+)+)$'
 
     def __init__(self) -> None:
         self.mock_objects = []
@@ -87,10 +123,15 @@ class PCEObjectMock(object):
         href_capture_pattern = re.compile(self.href_pattern)
         match = re.match(href_capture_pattern, path)
         if match:
+            href = match.group(1)
             for o in self.mock_objects:
-                if match.group(1) == o['href']:
+                if 'href' in o and href == o['href']:
                     return o
-            return {}
+            # Only return empty if the path looks like a specific resource
+            # (ends with an ID-like segment containing digits or UUIDs)
+            last_segment = href.rsplit('/', 1)[-1]
+            if re.match(r'^[0-9]', last_segment) or (len(last_segment) > 8 and '-' in last_segment):
+                return {}
         return None
 
     def _get_matching_objects(self, path):
@@ -144,6 +185,14 @@ class PCEObjectMock(object):
         if not match:
             raise Exception("Invalid path: {}".format(path))
         object_type = match.group(1)
+        # For nested endpoints like /settings/events, try the last path segment
+        if object_type not in OBJECT_TYPE_REF_MAP:
+            # Extract last alpha segment from the URL path
+            segments = re.findall(r'/([a-zA-Z_\-]+)(?=/|$|\?)', path.split('/api/v2/')[-1])
+            for seg in reversed(segments):
+                if seg in OBJECT_TYPE_REF_MAP:
+                    object_type = seg
+                    break
         href = '/{}/{}'.format(path.split('/api/v2/')[-1], OBJECT_TYPE_REF_MAP[object_type]())
         body['href'] = href
         self.mock_objects.append(body)

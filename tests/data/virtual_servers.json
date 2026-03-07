@@ -1,0 +1,21 @@
+[
+    {
+        "href": "/orgs/1/sec_policy/draft/virtual_servers/a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "name": "VS-LB-PROD",
+        "description": "Production load balancer virtual server",
+        "mode": "unmanaged",
+        "created_at": "2023-01-01T00:00:00.000Z",
+        "updated_at": "2023-01-02T00:00:00.000Z",
+        "created_by": {"href": "/users/1"},
+        "updated_by": {"href": "/users/1"},
+        "dvs_name": "vs-lb-01",
+        "dvs_identifier": "10.0.0.100:443",
+        "labels": [
+            {"href": "/orgs/1/labels/1"},
+            {"href": "/orgs/1/labels/2"}
+        ],
+        "service": {"href": "/orgs/1/sec_policy/draft/services/1"},
+        "discovered_virtual_server": {"href": "/orgs/1/discovered_virtual_servers/abcd1234"},
+        "caps": ["write", "provision", "delete"]
+    }
+]

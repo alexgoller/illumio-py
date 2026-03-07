@@ -1,0 +1,21 @@
+[
+    {
+        "href": "/orgs/1/sec_policy/draft/firewall_settings/1",
+        "allow_dhcp_client": true,
+        "log_dropped_multicast": false,
+        "log_dropped_broadcast": false,
+        "allow_traceroute": true,
+        "allow_ipv6": false,
+        "network_detection_mode": "single_private_brn",
+        "ike_authentication_type": "psk",
+        "static_policy_scopes": [],
+        "firewall_coexistence": [],
+        "containers_inherit_host_policy_scopes": [],
+        "blocked_connection_reject_scopes": [],
+        "loopback_interfaces_in_policy_scopes": [],
+        "created_at": "2022-01-01T00:00:00.000Z",
+        "updated_at": "2022-06-01T00:00:00.000Z",
+        "created_by": {"href": "/users/1"},
+        "updated_by": {"href": "/users/1"}
+    }
+]

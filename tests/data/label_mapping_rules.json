@@ -1,0 +1,19 @@
+[
+    {
+        "href": "/orgs/1/label_mapping_rules/1",
+        "name": "Map production servers",
+        "description": "Assigns production labels based on hostname",
+        "enabled": true,
+        "order": 1,
+        "match_criteria": [
+            {"property": "hostname", "operator": "contains", "value": "prod"}
+        ],
+        "label_assignments": [
+            {"href": "/orgs/1/labels/1"}
+        ],
+        "created_at": "2023-06-01T00:00:00.000Z",
+        "updated_at": "2023-06-01T00:00:00.000Z",
+        "created_by": {"href": "/users/1"},
+        "updated_by": {"href": "/users/1"}
+    }
+]

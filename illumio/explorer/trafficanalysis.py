@@ -15,7 +15,7 @@ from datetime import datetime
 from typing import Any, List, Union, Optional
 
 from illumio import IllumioException
-from illumio.infrastructure import Network
+from illumio.util import MutableObject as _MutableObject
 from illumio.policyobjects import (
     IPList,
     Label,
@@ -37,6 +37,12 @@ from illumio.workloads import Workload
 
 AND = 'and'
 OR = 'or'
+
+
+@dataclass
+class Network(_MutableObject):
+    """Represents a network object referenced in traffic flow interfaces."""
+    pass
 
 
 @dataclass
