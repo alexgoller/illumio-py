@@ -3,9 +3,11 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=orange)](https://opensource.org/licenses/Apache-2.0)
 [![Latest Release](https://img.shields.io/github/v/release/illumio/illumio-py?label=Latest%20Release)](https://github.com/illumio/illumio-py/releases/latest)
 
-Illumio Policy Compute Engine REST client for python 3. Exposes PCE API endpoints as functions through a simple interface.  
+Illumio Policy Compute Engine REST client for python 3. Provides full API coverage of the Illumio PCE REST API with 56 registered CRUD endpoints and 67 custom methods for specialized operations.
 
-Compatible with Illumio Core PCE version 21.2+.  
+Covers security policy, workloads, VENs, infrastructure, access management, authentication, reporting, settings, label mapping, vulnerability management, and traffic analysis.
+
+Compatible with Illumio Core PCE version 21.2+.
 
 The main entrypoint for the client is the `PolicyComputeEngine` class:  
 

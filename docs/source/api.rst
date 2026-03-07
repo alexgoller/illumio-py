@@ -113,6 +113,26 @@ Enforcement Boundaries
 .. autoclass:: illumio.rules.EnforcementBoundary
     :members: build
 
+Firewall Settings
+#################
+
+.. autoclass:: illumio.secpolicy.FirewallSetting
+
+Policy Dependencies
+####################
+
+.. autoclass:: illumio.secpolicy.PolicyDependency
+
+Policy Checks
+##############
+
+.. autoclass:: illumio.secpolicy.PolicyCheck
+
+Modified Objects
+################
+
+.. autoclass:: illumio.secpolicy.ModifiedObject
+
 .. _policyobjects:
 
 Policy Objects
@@ -147,6 +167,13 @@ Virtual Services
 
 .. autoclass:: illumio.policyobjects.ServiceBinding
 
+Virtual Servers
+###############
+
+.. autoclass:: illumio.policyobjects.VirtualServer
+
+.. autoclass:: illumio.policyobjects.DVSVirtualServer
+
 .. _infrastructure:
 
 Infrastructure
@@ -158,6 +185,36 @@ Container Clusters
 .. autoclass:: illumio.infrastructure.ContainerCluster
 
 .. autoclass:: illumio.infrastructure.ContainerWorkloadProfile
+
+Network Devices
+###############
+
+.. autoclass:: illumio.infrastructure.NetworkDevice
+
+Network Endpoints
+#################
+
+.. autoclass:: illumio.infrastructure.NetworkEndpoint
+
+Network Enforcement Nodes
+#########################
+
+.. autoclass:: illumio.infrastructure.NetworkEnforcementNode
+
+SLBs
+#####
+
+.. autoclass:: illumio.infrastructure.SLB
+
+Discovered Virtual Servers
+##########################
+
+.. autoclass:: illumio.infrastructure.DiscoveredVirtualServer
+
+Kubernetes Workloads
+####################
+
+.. autoclass:: illumio.infrastructure.KubernetesWorkload
 
 .. _explorer:
 
@@ -181,6 +238,176 @@ Users
 #####
 
 .. autoclass:: illumio.accessmanagement.User
+
+Roles
+#####
+
+.. autoclass:: illumio.accessmanagement.Role
+
+Permissions
+###########
+
+.. autoclass:: illumio.accessmanagement.Permission
+
+Service Accounts
+################
+
+.. autoclass:: illumio.accessmanagement.ServiceAccount
+
+Auth Security Principals
+########################
+
+.. autoclass:: illumio.accessmanagement.AuthSecurityPrincipal
+
+Access Restrictions
+###################
+
+.. autoclass:: illumio.accessmanagement.AccessRestriction
+
+.. _vulnerabilities:
+
+Vulnerabilities
+---------------
+
+Vulnerability
+#############
+
+.. autoclass:: illumio.vulnerabilities.Vulnerability
+
+Vulnerability Instances
+#######################
+
+.. autoclass:: illumio.vulnerabilities.VulnerabilityInstance
+
+Vulnerability Reports
+#####################
+
+.. autoclass:: illumio.vulnerabilities.VulnerabilityReport
+
+.. _authentication:
+
+Authentication
+--------------
+
+Authentication Settings
+#######################
+
+.. autoclass:: illumio.authentication.AuthenticationSettings
+
+LDAP Configuration
+##################
+
+.. autoclass:: illumio.authentication.LDAPConfig
+
+SAML Configuration
+##################
+
+.. autoclass:: illumio.authentication.SAMLConfig
+
+Password Policy
+################
+
+.. autoclass:: illumio.authentication.PasswordPolicy
+
+.. _reporting:
+
+Reporting
+---------
+
+Jobs
+####
+
+.. autoclass:: illumio.reporting.Job
+
+Reports
+#######
+
+.. autoclass:: illumio.reporting.Report
+
+Report Schedules
+################
+
+.. autoclass:: illumio.reporting.ReportSchedule
+
+Report Templates
+################
+
+.. autoclass:: illumio.reporting.ReportTemplate
+
+Core Service Types
+##################
+
+.. autoclass:: illumio.reporting.CoreServiceType
+
+Detected Core Services
+######################
+
+.. autoclass:: illumio.reporting.DetectedCoreService
+
+Support Bundle Requests
+#######################
+
+.. autoclass:: illumio.reporting.SupportBundleRequest
+
+System Events
+#############
+
+.. autoclass:: illumio.reporting.SystemEvent
+
+.. _settings:
+
+Settings
+--------
+
+Organization Settings
+#####################
+
+.. autoclass:: illumio.settings.OrgSettings
+
+Event Settings
+##############
+
+.. autoclass:: illumio.settings.EventSettings
+
+Report Settings
+###############
+
+.. autoclass:: illumio.settings.ReportSettings
+
+Syslog Destinations
+####################
+
+.. autoclass:: illumio.settings.SyslogDestination
+
+Traffic Collector Settings
+##########################
+
+.. autoclass:: illumio.settings.TrafficCollectorSetting
+
+Trusted Proxy IPs
+##################
+
+.. autoclass:: illumio.settings.TrustedProxyIPs
+
+Workload Settings
+#################
+
+.. autoclass:: illumio.settings.WorkloadSettings
+
+Optional Features
+#################
+
+.. autoclass:: illumio.settings.OptionalFeature
+
+.. _labelmapping:
+
+Label Mapping
+-------------
+
+Label Mapping Rules
+###################
+
+.. autoclass:: illumio.labelmapping.LabelMappingRule
 
 .. _util:
 

@@ -1,6 +1,48 @@
 Changelog
 =========
 
+Version 1.2.0 (2026-03-07)
+--------------------------
+
+.. rubric:: NEW FEATURES
+
+* full API coverage for Illumio PCE REST API (OpenAPI v25.2.10)
+    * 56 registered CRUD API endpoints (up from 20)
+    * 67 custom methods on ``PolicyComputeEngine`` for specialized operations
+* new ``illumio.authentication`` subpackage
+    * ``AuthenticationSettings``, ``LDAPConfig``, ``SAMLConfig``, ``PasswordPolicy``
+* new ``illumio.reporting`` subpackage
+    * ``Job``, ``Report``, ``ReportSchedule``, ``ReportTemplate``
+    * ``CoreServiceType``, ``DetectedCoreService``
+    * ``SupportBundleRequest``, ``SystemEvent``
+* new ``illumio.settings`` subpackage
+    * ``OrgSettings``, ``EventSettings``, ``ReportSettings``
+    * ``SyslogDestination``, ``TrafficCollectorSetting``, ``TrustedProxyIPs``
+    * ``WorkloadSettings``, ``OptionalFeature``
+* new ``illumio.labelmapping`` subpackage
+    * ``LabelMappingRule`` with bulk operations and mapping job management
+* expanded ``illumio.accessmanagement`` subpackage
+    * ``Role``, ``Permission``, ``ServiceAccount``, ``AuthSecurityPrincipal``, ``AccessRestriction``
+* expanded ``illumio.infrastructure`` subpackage
+    * ``NetworkDevice``, ``NetworkEndpoint``, ``NetworkEnforcementNode``
+    * ``SLB``, ``DiscoveredVirtualServer``, ``KubernetesWorkload``
+* security policy operations: ``get_pending_policy_changes``, ``discard_pending_policy_changes``, ``check_policy``, ``search_rules``, ``analyze_policy_impact``, ``restore_policy``, ``bulk_delete_policy_objects``
+* VEN lifecycle management: ``unpair_vens``, ``upgrade_vens``, ``ven_remote_action``, ``ven_auth_recovery``, ``get_ven_statistics``, VEN software release management
+* workload operations: ``get_workload_interfaces``, ``create_workload_interface``, ``delete_workload_interface``, ``get_workload_risk_details``, ``unpair_workloads``, ``bulk_import_workloads``
+* access management: API key management for service accounts, users, and orgs; LDAP verification; user authentication
+* reporting: ``download_report``, ``get_risk_summary``, ``get_detected_core_services_summary``
+* PCE system info: ``get_product_version``, ``get_node_available``, ``get_supercluster_leader``
+* app group risk: ``get_app_group_risk_summary``, ``get_app_group_risk_details``
+* async query management: ``get_async_queries``, ``delete_async_query``, ``download_async_query``, ``update_async_query_rules``
+* traffic flow database metrics: ``get_traffic_flow_db_metrics``
+* registered ``VirtualServer``, ``FirewallSetting``, ``Vulnerability``, ``VulnerabilityReport`` as CRUD endpoints
+* added ``PolicyDependency``, ``PolicyCheck``, ``ModifiedObject`` dataclasses
+
+.. rubric:: IMPROVEMENTS
+
+* comprehensive Sphinx documentation updates covering all new APIs and usage examples
+* updated CLAUDE.md with full API coverage reference
+
 Version 1.1.3 (2023-02-10)
 --------------------------
 

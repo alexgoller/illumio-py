@@ -283,3 +283,380 @@ feature in the PCE.
     ...     query_name='blocked-rdp-traffic-july-22',
     ...     traffic_query=traffic_query
     ... )
+
+Security Policy Operations
+--------------------------
+
+The PCE uses a draft/active policy model where changes must be provisioned
+before they take effect. The **illumio** library provides several methods
+to manage the security policy lifecycle, from reviewing pending changes to
+provisioning or discarding them.
+
+.. rubric:: Reviewing Pending Changes
+
+Before provisioning, you can inspect what changes are queued:
+
+.. code-block:: python
+
+    >>> pending = pce.get_pending_policy_changes()
+
+.. rubric:: Policy Check
+
+Run a policy check to validate the current draft policy configuration:
+
+.. code-block:: python
+
+    >>> from illumio import PolicyCheck
+    >>> result = pce.check_policy()
+
+.. rubric:: Searching Rules
+
+Search for rules matching specific criteria:
+
+.. code-block:: python
+
+    >>> rules = pce.search_rules({'key': 'value'})
+
+.. rubric:: Impact Analysis
+
+Before provisioning changes, analyze the impact they will have on your
+environment:
+
+.. code-block:: python
+
+    >>> impact = pce.analyze_policy_impact(hrefs=[rule_set.href])
+
+.. rubric:: Discarding Changes
+
+If pending changes are no longer needed, discard them:
+
+.. code-block:: python
+
+    >>> pce.discard_pending_policy_changes()
+
+.. rubric:: Bulk Deletion
+
+Remove multiple policy objects in a single operation:
+
+.. code-block:: python
+
+    >>> pce.bulk_delete_policy_objects(hrefs=[ip_list.href, service.href])
+
+.. note::
+    Bulk deletion of policy objects will create pending changes that must be
+    provisioned before the objects are removed from active policy.
+
+VEN Lifecycle Management
+------------------------
+
+Virtual Enforcement Nodes (VENs) are the agents installed on workloads to
+enforce security policy. The **illumio** library provides methods for
+managing VEN lifecycle operations including unpairing, upgrading, and
+monitoring.
+
+.. rubric:: Unpairing VENs
+
+Remove VENs from workloads. The ``firewall_restore`` parameter controls
+what happens to the host firewall after unpairing:
+
+.. code-block:: python
+
+    >>> pce.unpair_vens(
+    ...     ven_hrefs=[ven1.href, ven2.href],
+    ...     firewall_restore='default'
+    ... )
+
+.. rubric:: Upgrading VENs
+
+Upgrade VENs to a specific software release:
+
+.. code-block:: python
+
+    >>> pce.upgrade_vens(ven_hrefs=[ven1.href], release='22.5.0')
+
+.. rubric:: VEN Statistics
+
+Retrieve statistics for one or more VENs:
+
+.. code-block:: python
+
+    >>> stats = pce.get_ven_statistics(ven_hrefs=[ven.href])
+
+.. rubric:: Software Releases
+
+Query available VEN software releases and set the default:
+
+.. code-block:: python
+
+    >>> releases = pce.get_ven_software_releases()
+    >>> pce.set_default_ven_release('22.5.0')
+
+.. note::
+    VEN upgrade operations are asynchronous. The PCE will schedule the
+    upgrade and the VEN will apply it during its next heartbeat cycle.
+
+Workload Operations
+-------------------
+
+In addition to the standard CRUD operations available through
+``pce.workloads``, several sub-endpoints provide additional workload
+management capabilities.
+
+.. rubric:: Network Interfaces
+
+Retrieve network interface details for a specific workload:
+
+.. code-block:: python
+
+    >>> interfaces = pce.get_workload_interfaces(workload.href)
+
+.. rubric:: Bulk Import
+
+Import a large number of workloads in a single operation:
+
+.. code-block:: python
+
+    >>> pce.bulk_import_workloads(data=[...])
+
+.. rubric:: Unpairing Workloads
+
+Unpair multiple workloads at once:
+
+.. code-block:: python
+
+    >>> pce.unpair_workloads(workload_hrefs=[w.href for w in workloads])
+
+.. rubric:: Risk Details
+
+Get vulnerability and risk information for a specific workload:
+
+.. code-block:: python
+
+    >>> risk = pce.get_workload_risk_details(workload.href)
+
+Access Management & Authentication
+-----------------------------------
+
+The PCE supports API key-based authentication for both user accounts and
+service accounts. The **illumio** library provides methods for managing
+these keys as well as verifying external authentication configurations.
+
+.. rubric:: Service Account API Keys
+
+Create and delete API keys for service accounts:
+
+.. code-block:: python
+
+    >>> key = pce.create_service_account_api_key(service_account.href)
+    >>> pce.delete_service_account_api_key(
+    ...     service_account.href, key_id='abc123'
+    ... )
+
+.. rubric:: User API Keys
+
+Manage API keys for individual user accounts:
+
+.. code-block:: python
+
+    >>> keys = pce.get_user_api_keys(user_id=1)
+    >>> new_key = pce.create_user_api_key(user_id=1)
+
+.. rubric:: Organization API Keys
+
+Retrieve all API keys across the organization:
+
+.. code-block:: python
+
+    >>> all_keys = pce.get_org_api_keys()
+
+.. rubric:: LDAP Verification
+
+Verify connectivity to an LDAP authentication server:
+
+.. code-block:: python
+
+    >>> pce.verify_ldap_connection(ldap_config.href)
+
+.. note::
+    API keys should be stored securely and rotated regularly. When a new
+    key is created, the secret is only available in the creation response
+    and cannot be retrieved again.
+
+Reporting & Monitoring
+----------------------
+
+The PCE provides several reporting and monitoring endpoints for tracking
+risk, detecting core services, and reviewing system events.
+
+.. rubric:: Reports
+
+Retrieve and download generated reports:
+
+.. code-block:: python
+
+    >>> reports = pce.reports.get()
+    >>> pce.download_report(report.href)
+
+.. rubric:: Risk Summary
+
+Get an overview of vulnerability risk across the environment:
+
+.. code-block:: python
+
+    >>> risk = pce.get_risk_summary()
+
+.. rubric:: Core Services Detection
+
+Retrieve a summary of detected core services:
+
+.. code-block:: python
+
+    >>> summary = pce.get_detected_core_services_summary()
+
+.. rubric:: System Events
+
+Query system-wide events. System events use a global endpoint and are not
+scoped to a specific organization:
+
+.. code-block:: python
+
+    >>> events = pce.system_events.get()
+
+Organization Settings
+---------------------
+
+The PCE exposes several settings endpoints for configuring organization-wide
+behavior, event handling, logging, and traffic collection.
+
+.. rubric:: Organization Settings
+
+Read the current organization settings:
+
+.. code-block:: python
+
+    >>> settings = pce.org_settings.get()
+
+.. rubric:: Event Settings
+
+View and manage event configuration:
+
+.. code-block:: python
+
+    >>> event_settings = pce.event_settings.get()
+
+.. rubric:: Syslog Destinations
+
+Manage syslog forwarding destinations:
+
+.. code-block:: python
+
+    >>> destinations = pce.syslog_destinations.get()
+
+.. rubric:: Traffic Collector Settings
+
+View and manage traffic collector configuration:
+
+.. code-block:: python
+
+    >>> tc = pce.traffic_collector_settings.get()
+
+Label Mapping
+-------------
+
+Label mapping rules allow you to automatically assign labels to workloads
+based on hostname patterns, IP addresses, or other attributes. The
+**illumio** library provides full CRUD support for label mapping rules
+as well as methods for running and monitoring label mapping jobs.
+
+.. rubric:: Managing Label Mapping Rules
+
+Create and retrieve label mapping rules:
+
+.. code-block:: python
+
+    >>> rules = pce.label_mapping_rules.get()
+    >>> rule = pce.label_mapping_rules.create(
+    ...     LabelMappingRule(name='My Rule', ...)
+    ... )
+
+.. rubric:: Reordering Rules
+
+Label mapping rules are evaluated in order. You can reorder them by
+specifying a new position:
+
+.. code-block:: python
+
+    >>> pce.reorder_label_mapping_rule(rule.href, position=1)
+
+.. rubric:: Running Label Mapping
+
+Execute label mapping rules and track job progress:
+
+.. code-block:: python
+
+    >>> job = pce.run_label_mapping_rules(data={...})
+    >>> status = pce.get_label_mapping_job(job_uuid='...')
+    >>> results = pce.download_label_mapping_results(job_uuid='...')
+
+.. note::
+    Label mapping jobs run asynchronously. Use the job UUID returned from
+    ``run_label_mapping_rules`` to poll for status and download results
+    once the job completes.
+
+PCE System Information
+----------------------
+
+The **illumio** library provides access to various PCE system-level
+endpoints for querying version information, node status, and managing
+async operations.
+
+.. rubric:: Product Version
+
+Retrieve the PCE software version:
+
+.. code-block:: python
+
+    >>> version = pce.get_product_version()
+
+.. rubric:: Node Availability
+
+Check whether the PCE node is available and ready to serve requests:
+
+.. code-block:: python
+
+    >>> available = pce.get_node_available()
+
+.. rubric:: Supercluster Leader
+
+In a supercluster deployment, determine which PCE is the current leader:
+
+.. code-block:: python
+
+    >>> leader = pce.get_supercluster_leader()
+
+.. rubric:: Application Group Risk
+
+Query risk information at the application group level:
+
+.. code-block:: python
+
+    >>> risk_summary = pce.get_app_group_risk_summary()
+    >>> risk_details = pce.get_app_group_risk_details(app_group_id='...')
+
+.. rubric:: Traffic Flow Metrics
+
+Retrieve metrics about the traffic flow database:
+
+.. code-block:: python
+
+    >>> metrics = pce.get_traffic_flow_db_metrics()
+
+.. rubric:: Async Query Management
+
+Manage asynchronous queries that have been submitted to the PCE:
+
+.. code-block:: python
+
+    >>> queries = pce.get_async_queries()
+    >>> pce.delete_async_query(uuid='...')
+    >>> results = pce.download_async_query(uuid='...')
