@@ -83,6 +83,29 @@ class IKEAuthenticationCertificate(JsonObject):
 
 
 @dataclass
+class Ransomware(JsonObject):
+    workload_exposure_severity: str = None
+    ransomware_protection_percent: float = None
+    last_updated_at: str = None
+
+
+@dataclass
+class RiskSummary(JsonObject):
+    ransomware: Ransomware = None
+
+
+@dataclass
+class ContainerPolicyConvergenceStatus(JsonObject):
+    total_pods_count: int = None
+    success_pods_count: int = None
+    pending_pods_count: int = None
+    errors_count: int = None
+    acked_at: str = None
+    fully_converged_at: str = None
+    errors: List[dict] = None
+
+
+@dataclass
 @pce_api('workloads')
 class Workload(MutableObject):
     """Represents a workload in the PCE.
@@ -165,6 +188,10 @@ class Workload(MutableObject):
     selectively_enforced_services: List[Union[Service, ServicePort]] = None
     container_cluster: ContainerCluster = None
     ike_authentication_certificate: IKEAuthenticationCertificate = None
+    managed: bool = None
+    datacenter_nat_1to1: bool = None
+    risk_summary: RiskSummary = None
+    container_policy_convergence_status: ContainerPolicyConvergenceStatus = None
 
     def _validate(self):
         if self.enforcement_mode and not self.enforcement_mode in EnforcementMode:
@@ -190,5 +217,8 @@ __all__ = [
     'VulnerabilitiesSummary',
     'DetectedVulnerability',
     'IKEAuthenticationCertificate',
+    'Ransomware',
+    'RiskSummary',
+    'ContainerPolicyConvergenceStatus',
     'Workload',
 ]

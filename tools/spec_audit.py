@@ -146,9 +146,12 @@ def schema_for_registration(name, classes, schema_index):
 def source_duplicate_registrations():
     """Scan source for @pce_api('name', ...) occurrences; return name -> count>1."""
     counts = {}
+    # Match only real decorators (column 0), not @pce_api examples inside docstrings
+    # (e.g. the decorator's own docstring uses ">>> @pce_api('labels', ...)").
+    pattern = re.compile(r"^@pce_api\(\s*'([^']+)'", re.MULTILINE)
     for path in glob(os.path.join(REPO_ROOT, 'illumio', '**', '*.py'), recursive=True):
         with open(path) as f:
-            for m in re.finditer(r"@pce_api\(\s*'([^']+)'", f.read()):
+            for m in pattern.finditer(f.read()):
                 counts[m.group(1)] = counts.get(m.group(1), 0) + 1
     return {n: c for n, c in counts.items() if c > 1}
 

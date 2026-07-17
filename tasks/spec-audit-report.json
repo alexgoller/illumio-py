@@ -594,14 +594,12 @@
     ]
   },
   {
-    "type": "missing_field",
+    "type": "extra_field",
     "api": "rules",
     "model": "Rule",
     "schema": "sec_policy_rule_sets_sec_rules_get",
     "fields": [
-      "all_ips_except_for_in_consumers",
-      "all_ips_except_for_in_providers",
-      "use_workload_subnets"
+      "egress_services"
     ]
   },
   {
@@ -803,18 +801,6 @@
     ]
   },
   {
-    "type": "missing_field",
-    "api": "vens",
-    "model": "VEN",
-    "schema": "vens_get",
-    "fields": [
-      "authentication_recovery",
-      "golden_image",
-      "upgrade_expires_at",
-      "upgrade_target_version"
-    ]
-  },
-  {
     "type": "extra_field",
     "api": "vens",
     "model": "VEN",
@@ -862,18 +848,6 @@
     ]
   },
   {
-    "type": "missing_field",
-    "api": "workloads",
-    "model": "Workload",
-    "schema": "workloads_get",
-    "fields": [
-      "container_policy_convergence_status",
-      "datacenter_nat_1to1",
-      "managed",
-      "risk_summary"
-    ]
-  },
-  {
     "type": "extra_field",
     "api": "workloads",
     "model": "Workload",
@@ -884,11 +858,6 @@
       "os_type",
       "visibility_level"
     ]
-  },
-  {
-    "type": "duplicate_reg",
-    "api": "labels",
-    "count": 2
   },
   {
     "type": "uncovered_class",

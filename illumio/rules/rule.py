@@ -150,6 +150,10 @@ class Rule(BaseRule, MutableObject):
     consuming_security_principals: List[Reference] = None
     unscoped_consumers: bool = None
     network_type: str = None
+    use_workload_subnets: List[str] = None
+    all_ips_except_for_in_consumers: bool = None
+    all_ips_except_for_in_providers: bool = None
+    egress_services: List[Service] = None
 
     @classmethod
     def build(cls, providers: List[Union[str, Reference, dict]], consumers: List[Union[str, Reference, dict]],

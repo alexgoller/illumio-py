@@ -115,3 +115,26 @@ Full unit suite: 333 passed. Deny rules are DONE and live-validated.
 
 **Env note:** venv has a stale non-editable `illumio` in site-packages shadowing the
 working tree for out-of-repo scripts; use PYTHONPATH or `pip install -e .`.
+
+---
+
+## Tier 1 audit fixes (backwards-compatible, additive) — DONE
+
+From `tasks/spec-audit-report.md`. All additive; full suite: 336 passed.
+
+- **`labels` duplicate** — FALSE POSITIVE (audit regex matched the `@pce_api`
+  example inside the decorator's docstring). No code change; fixed the audit tool
+  to only match column-0 decorators.
+- **`Rule`** — added `all_ips_except_for_in_consumers`, `all_ips_except_for_in_providers`,
+  `use_workload_subnets` (schema) + `egress_services` (present on live PCE though the
+  bundled schema omits it). **Live-validated** against real allow rules.
+- **`Workload`** — added `managed`, `datacenter_nat_1to1`, and typed nested
+  `risk_summary` (RiskSummary/Ransomware) + `container_policy_convergence_status`
+  (ContainerPolicyConvergenceStatus). Strengthened the previously-weak
+  "decoded as dict" tests to assert typed decoding. Schema-validated + decode tests
+  (this PCE tenant has 0 workloads, so no live sample).
+- **`VEN`** — added `authentication_recovery`, `golden_image`,
+  `upgrade_target_version`, `upgrade_expires_at`. Schema-validated + decode tests
+  (0 VENs on this tenant).
+
+Re-run audit confirms rules/workloads/vens have no remaining missing Tier-1 fields.

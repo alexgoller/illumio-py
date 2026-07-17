@@ -216,3 +216,22 @@ class TestVENNewFields:
         assert ven.os_id is not None
         assert ven.os_detail is not None
         assert ven.os_platform in ['windows', 'linux']
+
+
+def test_ven_upgrade_and_recovery_fields_decode():
+    """VEN upgrade/recovery fields decode with correct types."""
+    ven = VEN.from_json({
+        "href": "/orgs/1/vens/test-uuid",
+        "hostname": "web01.example.com",
+        "authentication_recovery": True,
+        "golden_image": False,
+        "upgrade_target_version": "23.5.0-1234",
+        "upgrade_expires_at": "2026-02-01T00:00:00.000Z",
+    })
+    assert ven.authentication_recovery is True
+    assert ven.golden_image is False
+    assert ven.upgrade_target_version == "23.5.0-1234"
+    assert ven.upgrade_expires_at.startswith("2026")
+    field_names = {f.name for f in VEN.__dataclass_fields__.values()}
+    assert {'authentication_recovery', 'golden_image',
+            'upgrade_target_version', 'upgrade_expires_at'} <= field_names
