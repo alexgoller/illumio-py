@@ -1,7 +1,7 @@
 Changelog
 =========
 
-Version 1.2.0 (2026-03-07)
+Version 1.2.0 (2026-07-17)
 --------------------------
 
 .. rubric:: NEW FEATURES
@@ -37,11 +37,30 @@ Version 1.2.0 (2026-03-07)
 * traffic flow database metrics: ``get_traffic_flow_db_metrics``
 * registered ``VirtualServer``, ``FirewallSetting``, ``Vulnerability``, ``VulnerabilityReport`` as CRUD endpoints
 * added ``PolicyDependency``, ``PolicyCheck``, ``ModifiedObject`` dataclasses
+* spec-conformance audit tool (``tools/spec_audit.py``) diffing every registered model against the official Illumio JSON schemas
+* added schema-accurate model fields (validated against a live PCE where possible):
+    * ``Rule``: ``all_ips_except_for_in_consumers``, ``all_ips_except_for_in_providers``, ``use_workload_subnets``, ``egress_services``
+    * ``Workload``: ``managed``, ``datacenter_nat_1to1``, ``risk_summary`` (``RiskSummary``/``Ransomware``), ``container_policy_convergence_status``
+    * ``VEN``: ``authentication_recovery``, ``golden_image``, ``upgrade_target_version``, ``upgrade_expires_at``
+
+.. rubric:: BUG FIXES
+
+* corrected the deny-rule model to match the real Illumio API (schema- and live-PCE-validated):
+    * a single ``DenyRule`` object carries an ``override`` flag (``override=True`` is an override-deny rule); precedence is override-deny > allow > deny
+    * ``OverrideDenyRule`` is now a convenience whose ``build`` defaults ``override=True``; both use the nested ``/deny_rules`` endpoint (there is no separate override-deny endpoint)
+    * removed fields that do not exist in the API: ``DenyRule.priority``, ``OverrideDenyRule.overrides``, and the ``Rule.action`` / ``RuleAction`` conflation
+    * removed ``RuleSet.override_deny_rules``; a ruleset exposes a single ``deny_rules`` array holding both ordinary and override-deny rules
 
 .. rubric:: IMPROVEMENTS
 
 * comprehensive Sphinx documentation updates covering all new APIs and usage examples
 * updated CLAUDE.md with full API coverage reference
+
+.. rubric:: PACKAGING
+
+* released as the community-maintained fork ``illumio-py-open`` (the import package remains ``illumio``)
+* tag-triggered PyPI release workflow (``.github/workflows/release.yml``) using trusted publishing; final ``vX.Y.Z`` tags publish to PyPI
+* development and API-reference material excluded from the built distribution
 
 Version 1.1.3 (2023-02-10)
 --------------------------
