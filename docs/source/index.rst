@@ -8,12 +8,16 @@
 Illumio Core Python API Client
 ==============================
 
-.. image:: https://img.shields.io/github/v/release/illumio/illumio-py?label=Latest%20Release
-   :target: https://github.com/illumio/illumio-py/releases/latest
+.. image:: https://img.shields.io/github/v/release/alexgoller/illumio-py?label=Latest%20Release
+   :target: https://github.com/alexgoller/illumio-py/releases/latest
    :alt: Latest Release Badge
 
-.. image:: https://img.shields.io/pypi/pyversions/illumio.svg
-    :target: https://pypi.org/project/illumio/
+.. image:: https://img.shields.io/pypi/v/illumio-py-open.svg
+    :target: https://pypi.org/project/illumio-py-open/
+    :alt: PyPI Version Badge
+
+.. image:: https://img.shields.io/pypi/pyversions/illumio-py-open.svg
+    :target: https://pypi.org/project/illumio-py-open/
     :alt: Python Version Support Badge
 
 The **illumio** python library exposes Policy Compute Engine API endpoints
@@ -26,7 +30,7 @@ Check out the :ref:`Quickstart Guide <quickstart>`.
 
 If not, see the :ref:`Install Guide <install>`, or just run::
 
-   $ python -m pip install illumio
+   $ python -m pip install illumio-py-open
 
 ----------------------------------
 
