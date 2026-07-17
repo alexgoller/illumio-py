@@ -33,3 +33,8 @@ _version.py
 
 # local environment
 *.env
+
+# Illumio API reference material (large; not shipped, kept locally for the audit tool)
+webservices-v2-experimental-*/
+illumio-*-openapi*.json
+illumio-v2-openapi-experimental-*.json

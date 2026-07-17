@@ -1,2 +1,9 @@
 illumio-py
 Copyright 2022 Illumio
+
+This product includes software developed at Illumio (https://www.illumio.com/).
+
+illumio-py-open is a community-maintained fork of illumio/illumio-py
+(https://github.com/illumio/illumio-py), modified to track current Illumio Core
+REST APIs. Changes are made under the terms of the Apache License 2.0. This fork
+is not an official Illumio product and is not endorsed by Illumio.
