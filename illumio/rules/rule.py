@@ -164,29 +164,33 @@ class Rule(BaseRule, MutableObject):
 
 @dataclass
 class _DenyRuleBase(BaseRule, MutableObject):
-    """Shared shape for deny and override-deny rules.
+    """Shared shape for deny rules, modelled on the ``deny_rules_get`` schema.
 
-    Deny rules and override-deny rules are rule *types* that live nested under
-    a ruleset, alongside allow rules. They share the same fields as an allow
-    :class:`Rule` and differ only by the nested endpoint they are posted to.
-    Rule precedence is determined by type — override-deny > allow > deny — so
-    there is no numeric ``priority`` field, and override-deny rules do not
-    reference specific deny rules.
+    A deny rule blocks traffic from its providers to its consumers on the given
+    services. The ``override`` flag sets its precedence in the policy evaluation
+    order override-deny > allow > deny:
+
+    - ``override=False`` (default): an ordinary deny rule, superseded by allow
+      and override-deny rules.
+    - ``override=True``: an override-deny rule that takes precedence over allow
+      rules and cannot be overridden by them.
+
+    Deny rules live nested under a ruleset and are created, fetched, updated,
+    and deleted with the ruleset passed as ``parent``. Unlike allow rules, deny
+    rules have no ``resolve_labels_as`` field; there is no numeric ``priority``.
     """
     enabled: bool = None
-    resolve_labels_as: LabelResolutionBlock = None
-    unscoped_consumers: bool = None
+    override: bool = None
     network_type: str = None
+    unscoped_consumers: bool = None
+    all_ips_except_for_in_consumers: bool = None
+    all_ips_except_for_in_providers: bool = None
+    egress_services: List[Service] = None
 
     @classmethod
     def build(cls, providers: List[Union[str, Reference, dict]], consumers: List[Union[str, Reference, dict]],
-            ingress_services: List[Union[JsonObject, dict, str]],
-            resolve_providers_as: List[str]=None, resolve_consumers_as: List[str]=None, enabled=True, **kwargs):
-        resolve_labels_as = LabelResolutionBlock(
-            providers=resolve_providers_as or [RESOLVE_AS_WORKLOADS],
-            consumers=resolve_consumers_as or [RESOLVE_AS_WORKLOADS]
-        )
-        return super().build(providers, consumers, ingress_services, resolve_labels_as=resolve_labels_as, enabled=enabled, **kwargs)
+            ingress_services: List[Union[JsonObject, dict, str]], enabled=True, override=None, **kwargs):
+        return super().build(providers, consumers, ingress_services, enabled=enabled, override=override, **kwargs)
 
 
 @dataclass
@@ -196,8 +200,10 @@ class DenyRule(_DenyRuleBase):
 
     Deny rules explicitly block traffic from the defined providers to the
     defined consumers on the specified services. In the policy evaluation
-    order (override-deny > allow > deny), a deny rule is applied last and can
-    be overridden by an allow or override-deny rule.
+    order (override-deny > allow > deny), an ordinary deny rule is applied last
+    and can be overridden by an allow or override-deny rule. Set
+    ``override=True`` (or use :class:`OverrideDenyRule`) for an override-deny
+    rule that takes precedence over allow rules.
 
     Deny rules live nested under a ruleset and are created, fetched, updated,
     and deleted with the ruleset passed as ``parent``.
@@ -222,17 +228,15 @@ class DenyRule(_DenyRuleBase):
 
 
 @dataclass
-@pce_api('override_deny_rules', endpoint='/override_deny_rules')
+@pce_api('override_deny_rules', endpoint='/deny_rules')
 class OverrideDenyRule(_DenyRuleBase):
-    """Represents an override-deny rule in the PCE.
+    """Convenience for an override-deny rule (a deny rule with ``override=True``).
 
     Override-deny rules block traffic and have the highest precedence in the
     policy evaluation order (override-deny > allow > deny): they cannot be
-    overridden by allow rules. Structurally they are identical to
-    :class:`DenyRule`, differing only by the nested endpoint they use.
-
-    Override-deny rules live nested under a ruleset and are created, fetched,
-    updated, and deleted with the ruleset passed as ``parent``.
+    overridden by allow rules. They are the same object as :class:`DenyRule`
+    distinguished by the ``override`` flag, and use the same ``/deny_rules``
+    nested endpoint; :meth:`build` simply defaults ``override=True``.
 
     Usage:
         >>> import illumio
@@ -250,6 +254,11 @@ class OverrideDenyRule(_DenyRuleBase):
         ... )
         >>> override_rule = pce.override_deny_rules.create(override_rule, parent=ruleset)
     """
+
+    @classmethod
+    def build(cls, providers: List[Union[str, Reference, dict]], consumers: List[Union[str, Reference, dict]],
+            ingress_services: List[Union[JsonObject, dict, str]], enabled=True, override=True, **kwargs):
+        return super().build(providers, consumers, ingress_services, enabled=enabled, override=override, **kwargs)
 
 
 __all__ = [

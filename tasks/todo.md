@@ -65,3 +65,32 @@ validation, and the bogus top-level `/sec_policy/draft/deny_rules/N` hrefs.
 
 **Note:** `tests/unit/mocks.py` still lists unused `sec_deny_rules`/
 `sec_override_deny_rules` entries in `OBJECT_TYPE_REF_MAP` — harmless, left as-is.
+
+---
+
+## Second pass — validated against authoritative schema files (user-provided)
+
+The user supplied `webservices-v2-experimental-26.3.0/` with the real JSON schema
+files. Validating against `common/deny_rules_get.schema.json` showed my first pass
+had the *endpoint* right but several *fields* wrong. Corrected:
+
+- **`override` (bool) is a REAL field** — it is what makes an override-deny rule.
+  Re-added. (My first pass wrongly removed it.)
+- **`resolve_labels_as` is NOT a deny-rule field** — removed (it's allow-rule only).
+- **Added** schema fields: `egress_services` (List[Service]),
+  `all_ips_except_for_in_consumers`, `all_ips_except_for_in_providers`.
+- Kept: enabled, network_type, unscoped_consumers (+ inherited href/description/
+  timestamps/caps).
+
+**Model shape (user-approved):** one `DenyRule` object with an `override` flag;
+`OverrideDenyRule` is a thin convenience whose `build()` defaults `override=True`.
+Both register the same `/deny_rules` nested endpoint.
+
+**Schema conformance proof:** every one of the 20 `deny_rules_get` properties maps
+to a `DenyRule` field (0 missing). `Rule.action` removal also confirmed correct —
+the real allow `sec_rule` schema has no `action` field.
+
+**Behavioral proof:** `DenyRule` → `POST …/rule_sets/3/deny_rules` (override=false);
+`OverrideDenyRule` → same endpoint (override=true).
+
+Full unit suite: 331 passed.

@@ -166,19 +166,12 @@
       "proto": 6
      }
     ],
-    "resolve_labels_as": {
-     "providers": [
-      "workloads"
-     ],
-     "consumers": [
-      "workloads"
-     ]
-    }
+    "override": false
    }
   ],
   "override_deny_rules": [
    {
-    "href": "/orgs/1/sec_policy/draft/rule_sets/3/override_deny_rules/1",
+    "href": "/orgs/1/sec_policy/draft/rule_sets/3/deny_rules/100",
     "name": "ODR-Allow-Admin-In-RuleSet",
     "enabled": true,
     "providers": [
@@ -201,14 +194,7 @@
       "proto": 6
      }
     ],
-    "resolve_labels_as": {
-     "providers": [
-      "workloads"
-     ],
-     "consumers": [
-      "workloads"
-     ]
-    }
+    "override": true
    }
   ],
   "ip_tables_rules": [],
