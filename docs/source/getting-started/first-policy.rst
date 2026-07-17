@@ -1,58 +1,14 @@
-.. _quickstart:
+.. _apiendpoints:
 
 .. currentmodule:: illumio
 
-Quickstart Guide
-================
+Your first policy
+=================
 
-This document provides a basic introduction to the core features of the
-**illumio** library, from connecting to the Illumio Policy Compute Engine
-to creating and provisioning policy.
-
-Make sure you have the library :ref:`installed <install>`, then read on for
-some simple examples.
-
-.. note::
-
-    This guide assumes a base level of familiarity with the PCE APIs. Refer to the
-    `Illumio PCE REST API Developer Guide <https://docs.illumio.com/core/21.5/Content/LandingPages/Guides/rest-api.htm>`_
-    or the `PCE API reference <https://docs.illumio.com/core/21.5/API-Reference/index.html>`_
-    for your PCE version for a more complete introduction to API usage and schema.
-
-.. _pceconnect:
-
-Connect to the PCE
-------------------
-
-The first step for any application will be to connect to the Policy Compute Engine.
-The **illumio** library makes this simple with the :class:`PolicyComputeEngine <PolicyComputeEngine>` class::
-
-    >>> from illumio import PolicyComputeEngine
-    >>> pce = PolicyComputeEngine('my.pce.com', port=443, org_id=1)
-
-.. note::
-    The first ``PolicyComputeEngine`` parameter can be passed as a URL - useful
-    if your PCE instance does not have TLS certificates configured - or as an
-    FQDN as shown above. When passing just the domain name, the scheme will
-    default to ``https://``.
-
-In order to access the PCE API endpoints, we now need to provide credentials to
-authorize our ``pce`` instance::
-
-    >>> pce.set_credentials('api_key', 'api_secret')
-
-.. note::
-    Both username/password and API key/secret values can be passed to :meth:`set_credentials <PolicyComputeEngine.set_credentials>`.
-
-Now that we've set up our connection details, we can confirm that our connection is working::
-
-    >>> print(pce.check_connection())
-    True
-
-Great! With only a few lines of code, we now have a working, persistent connection
-to our PCE that we can use to interact with the PCE APIs.
-
-.. _apiendpoints:
+Now that you're :ref:`connected <pceconnect>`, this tutorial walks through the
+core object interface — reading and writing PCE objects — and finishes by
+creating and provisioning policy. For end-to-end segmentation examples, see the
+:ref:`security policy guide <usecases>`.
 
 API Endpoints
 -------------

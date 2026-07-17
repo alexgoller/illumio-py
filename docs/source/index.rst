@@ -58,7 +58,8 @@ The documentation is split by what you're trying to do:
    :maxdepth: 2
 
    getting-started/install
-   getting-started/quickstart
+   getting-started/connect
+   getting-started/first-policy
 
 .. toctree::
    :caption: Guides
@@ -94,6 +95,8 @@ The documentation is split by what you're trying to do:
    :caption: Project
    :maxdepth: 1
 
+   project/migrating-from-illumio
+   project/compatibility
    project/changelog
 
 * :ref:`genindex`
