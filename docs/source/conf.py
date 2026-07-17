@@ -14,9 +14,9 @@ import os
 import sys
 
 if sys.version_info < (3, 8):
-    from importlib_metadata import version
+    from importlib_metadata import version, PackageNotFoundError
 else:
-    from importlib.metadata import version
+    from importlib.metadata import version, PackageNotFoundError
 
 sys.path.insert(0, os.path.abspath("../.."))
 
@@ -24,12 +24,20 @@ from illumio import PCE_APIS, BULK_CHANGE_LIMIT
 
 # -- Project information -----------------------------------------------------
 
-project = 'illumio'
-copyright = '2022, Illumio'
-author = 'Illumio'
+project = 'illumio-py-open'
+copyright = '2022, Illumio; community fork and contributors'
+author = 'Illumio and contributors'
 
-# The full version, including alpha/beta/rc tags
-release = version('illumio')
+# The full version, including alpha/beta/rc tags. Fall back gracefully so the
+# docs build even when the distribution metadata isn't installed under the
+# expected name.
+try:
+    release = version('illumio-py-open')
+except PackageNotFoundError:
+    try:
+        release = version('illumio')
+    except PackageNotFoundError:
+        release = '0.0.0'
 
 # Simple x.y.z version number
 version = '.'.join(release.split('.')[:3])
