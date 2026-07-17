@@ -634,3 +634,79 @@ dedicated quarantine zone.
         labels=quarantine_labels,
         enforcement_mode=EnforcementMode.FULL
     ))
+
+.. _denyrules:
+
+Deny and override-deny rules
+----------------------------
+
+Deny rules block traffic between sources and destinations. They live nested
+under a rule set, alongside allow rules, and are created by passing the rule set
+as the ``parent`` argument.
+
+There is a single deny-rule object. Its ``override`` flag determines its
+precedence in the policy evaluation order — **override-deny > allow > deny**:
+
+* ``override=False`` (the default) is an ordinary deny rule; allow and
+  override-deny rules can supersede it.
+* ``override=True`` is an *override-deny* rule that takes precedence over allow
+  rules and cannot be overridden by them.
+
+:class:`DenyRule <illumio.rules.DenyRule>` and
+:class:`OverrideDenyRule <illumio.rules.OverrideDenyRule>` are the same object;
+``OverrideDenyRule.build`` simply defaults ``override=True``. Both are sent to
+the same nested ``deny_rules`` endpoint.
+
+.. code-block:: python
+
+    from illumio import (
+        PolicyComputeEngine, RuleSet, DenyRule, OverrideDenyRule, LabelSet, AMS
+    )
+
+    pce = PolicyComputeEngine('my.pce.com', port='443', org_id='1')
+    pce.set_credentials('api_key', 'api_secret')
+
+    # deny rules live in a rule set; create one (an empty scope applies to all)
+    rule_set = pce.rule_sets.create(RuleSet(
+        name='RS-DENY-EXAMPLE',
+        scopes=[LabelSet(labels=[])]
+    ))
+
+    # the built-in "Any (0.0.0.0/0 and ::/0)" IP list
+    any_ip_list = pce.get_default_ip_list()
+
+    # an ordinary deny rule: block inbound SSH to all workloads
+    deny_ssh = DenyRule.build(
+        providers=[AMS],  # AMS is the special literal for all workloads
+        consumers=[any_ip_list.href],
+        ingress_services=[{'port': 22, 'proto': 'tcp'}]
+    )
+    deny_ssh = pce.deny_rules.create(deny_ssh, parent=rule_set)
+
+    # an override-deny rule: block RDP with the highest precedence
+    override_rdp = OverrideDenyRule.build(
+        providers=[AMS],
+        consumers=[any_ip_list.href],
+        ingress_services=[{'port': 3389, 'proto': 'tcp'}]
+    )
+    override_rdp = pce.override_deny_rules.create(override_rdp, parent=rule_set)
+
+A rule set exposes a single ``deny_rules`` collection that holds both ordinary
+and override-deny rules; the ``override`` attribute distinguishes them:
+
+.. code-block:: python
+
+    >>> for rule in pce.deny_rules.get(parent=rule_set):
+    ...     print(rule.override, rule.href)
+    False /orgs/1/sec_policy/draft/rule_sets/5/deny_rules/1
+    True  /orgs/1/sec_policy/draft/rule_sets/5/deny_rules/2
+
+As with all security policy changes, newly created deny rules are **draft**
+objects and are not enforced until they are provisioned:
+
+.. code-block:: python
+
+    pce.provision_policy_changes(
+        'Add deny rules',
+        hrefs=[rule_set.href]
+    )

@@ -28,6 +28,7 @@ class RuleSet(MutableObject):
     the set will default to applying to workloads with these labels.
 
     Rule sets can contain:
+
     - rules: Standard allow rules (sec_rules)
     - deny_rules: Block rules; each carries an ``override`` flag. Rules are
       evaluated in the order override-deny (``override=True``) > allow > deny
