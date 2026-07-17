@@ -1,6 +1,32 @@
 Changelog
 =========
 
+Version 1.2.1 (2026-07-17)
+--------------------------
+
+.. rubric:: IMPROVEMENTS
+
+* Tier-2 spec-conformance: reconciled the settings, authentication, and reporting
+  models with the current PCE API. All additive — pre-1.2.0 field names are kept
+  as deprecated aliases. Live-validated against a real PCE where data was available.
+
+    * ``SAMLConfig``: ``issuer``, ``idp_sso_target_url``, ``idp_slo_target_url``, ``idp_cert``, ``cluster_fqdn``, ``consumer_service_url``, ``consumer_logout_url``, ``name_identifier_format``, ``authn_context``, ``force_authn``, ``sign_authn_request``, ``pce_signing_cert``, ``pce_signing_cert_expires_at``
+    * ``PasswordPolicy``: ``expire_time_days``, ``min_changed_characters``, ``min_characters_per_type``, ``require_type_lowercase``, ``require_type_uppercase``, ``require_type_number``, ``require_type_symbol``
+    * ``LDAPConfig``: ``authentication_method``, ``bind_distinguished_name``, ``user_base_distinguished_name``, ``user_base_filter``, ``user_distinguished_name_pattern``, ``username_attribute``, ``full_name_attribute``, ``user_memberof_attribute``, ``request_timeout_seconds``, ``tls_ca_bundle``, ``insecure_disable_tls_certificate_verification``, ``is_bind_password_set``, ``pce_fqdn``
+    * ``OrgSettings``: ``cloud_secure_tenant_id``, ``max_rule_search_provider_consumer_entities``, ``total_internet_address_space``, ``total_lateral_address_space``
+    * ``ReportSettings``: ``max_queued_reports``, ``report_retention_days``
+    * ``Report``: ``send_by_email``, ``generated_at``, ``progress_percentage``
+    * ``ReportSchedule``: ``report_generation_frequency``, ``scheduled_at``, ``send_by_email``
+    * ``ReportTemplate``: ``enabled``, ``report_parameters``, ``show_in_ui``
+
+* ``SAMLConfig`` and ``PasswordPolicy`` now extend ``MutableObject`` (gain ``created_at``/``updated_at``/``created_by``/``updated_by``).
+
+.. rubric:: DOCUMENTATION
+
+* Documentation now builds and publishes to GitHub Pages on every push to ``main``.
+* Added a "Deny and override-deny rules" use-case section to the user guide.
+* Modernized the Sphinx toolchain (``sphinx>=7.2``); fixed the distribution-name version lookup and landing-page badges for the fork.
+
 Version 1.2.0 (2026-07-17)
 --------------------------
 
