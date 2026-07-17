@@ -121,17 +121,17 @@ def test_rule_set_with_deny_rules_json(mock_rule_set_with_deny_rules):
     assert len(json_result['deny_rules']) == 1
     assert len(json_result['override_deny_rules']) == 1
     
-    # Verify deny rule structure
+    # Verify deny rule structure (no invented priority field)
     deny_rule = json_result['deny_rules'][0]
     assert deny_rule['name'] == 'DR-Block-SSH-In-RuleSet'
-    assert deny_rule['priority'] == 100
     assert deny_rule['enabled'] == True
-    
-    # Verify override deny rule structure
+    assert 'priority' not in deny_rule
+
+    # Verify override deny rule structure (a rule type, not a pointer)
     override_rule = json_result['override_deny_rules'][0]
     assert override_rule['name'] == 'ODR-Allow-Admin-In-RuleSet'
     assert override_rule['enabled'] == True
-    assert 'overrides' in override_rule
+    assert 'overrides' not in override_rule
 
 
 def test_rule_set_deny_rules_decoding():
@@ -142,10 +142,9 @@ def test_rule_set_deny_rules_decoding():
         "enabled": True,
         "deny_rules": [
             {
-                "href": "/orgs/1/sec_policy/draft/rule_sets/99/sec_deny_rules/1",
+                "href": "/orgs/1/sec_policy/draft/rule_sets/99/deny_rules/1",
                 "name": "DR-Test",
                 "enabled": True,
-                "priority": 50,
                 "providers": [{"label": {"href": "/orgs/1/labels/1"}}],
                 "consumers": [{"label": {"href": "/orgs/1/labels/2"}}],
                 "ingress_services": [{"port": 22, "proto": 6}],
@@ -161,7 +160,7 @@ def test_rule_set_deny_rules_decoding():
     assert len(ruleset.deny_rules) == 1
     assert isinstance(ruleset.deny_rules[0], DenyRule)
     assert ruleset.deny_rules[0].name == "DR-Test"
-    assert ruleset.deny_rules[0].priority == 50
+    assert '/rule_sets/99/deny_rules/' in ruleset.deny_rules[0].href
 
 
 def test_rule_set_empty_deny_rules():

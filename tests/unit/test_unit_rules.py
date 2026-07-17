@@ -52,7 +52,6 @@ def test_builder():
     expected_result = json.loads('''
         {
             "enabled": true,
-            "action": "allow",
             "ingress_services": [
                 {"port": 1234, "proto": 6}
             ],
@@ -71,27 +70,17 @@ def test_builder():
     assert rule.to_json() == expected_result
 
 
-def test_builder_with_deny_action():
-    """Test Rule.build with explicit deny action."""
+def test_allow_rule_has_no_action_field():
+    """Allow rules do not carry an ``action`` field; deny/override-deny are
+    separate rule types with their own nested endpoints."""
     rule = Rule.build(
         providers=['/orgs/1/labels/1'],
         consumers=['/orgs/1/labels/2'],
         ingress_services=[{'port': 22, 'proto': 6}],
-        action='deny'
     )
-    assert rule.action == 'deny'
-    assert rule.enabled == True
-
-
-def test_builder_with_override_deny_action():
-    """Test Rule.build with override_deny action."""
-    rule = Rule.build(
-        providers=['/orgs/1/labels/1'],
-        consumers=['/orgs/1/labels/2'],
-        ingress_services=[{'port': 22, 'proto': 6}],
-        action='override_deny'
-    )
-    assert rule.action == 'override_deny'
+    field_names = {f.name for f in Rule.__dataclass_fields__.values()}
+    assert 'action' not in field_names
+    assert 'action' not in rule.to_json()
 
 
 def test_get_rules(pce):

@@ -1,10 +1,8 @@
 [
     {
-        "href": "/orgs/1/sec_policy/draft/deny_rules/1",
-        "name": "DR-Block-SSH-External",
+        "href": "/orgs/1/sec_policy/draft/rule_sets/3/deny_rules/1",
         "description": "Block SSH from external sources",
         "enabled": true,
-        "priority": 100,
         "providers": [
             {
                 "ip_list": {
@@ -39,11 +37,9 @@
         }
     },
     {
-        "href": "/orgs/1/sec_policy/draft/deny_rules/2",
-        "name": "DR-Block-RDP",
+        "href": "/orgs/1/sec_policy/draft/rule_sets/3/deny_rules/2",
         "description": "Block RDP access",
         "enabled": true,
-        "priority": 90,
         "providers": [
             {
                 "actors": "ams"
@@ -80,11 +76,9 @@
         }
     },
     {
-        "href": "/orgs/1/sec_policy/draft/rule_sets/3/sec_deny_rules/1",
-        "name": "DR-Block-SSH-In-RuleSet",
+        "href": "/orgs/1/sec_policy/draft/rule_sets/3/deny_rules/3",
         "description": "Deny rule within ruleset context",
         "enabled": true,
-        "priority": 100,
         "providers": [
             {
                 "ip_list": {
