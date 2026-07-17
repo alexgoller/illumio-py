@@ -85,8 +85,7 @@ html_static_path = ['_static']
 # Include custom CSS styles.
 html_css_files = ['custom.css']
 
-# Use the Illumio logo in place of the library name.
-html_logo = 'illumio_logo.svg'
+# No logo — this is a community fork and not affiliated with Illumio.
 
 # Hide the Made with Sphinx footer.
 html_show_sphinx = False
