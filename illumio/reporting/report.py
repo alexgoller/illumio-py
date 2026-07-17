@@ -23,6 +23,9 @@ class Report(MutableObject):
     report_template: Reference = None
     report_parameters: dict = None
     send_to: List[str] = None
+    send_by_email: bool = None
+    generated_at: str = None
+    progress_percentage: int = None
 
 
 @dataclass
@@ -35,6 +38,9 @@ class ReportSchedule(MutableObject):
     report_template: Reference = None
     send_to: List[str] = None
     enabled: bool = None
+    report_generation_frequency: str = None
+    scheduled_at: str = None
+    send_by_email: bool = None
 
 
 @dataclass
@@ -46,6 +52,9 @@ class ReportTemplate(Reference):
     """
     name: str = None
     description: str = None
+    enabled: bool = None
+    report_parameters: dict = None
+    show_in_ui: bool = None
     template_type: str = None
     format: str = None
     created_at: str = None

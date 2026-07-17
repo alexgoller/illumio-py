@@ -32,6 +32,10 @@ class OrgSettings(Reference):
     automatic_clone_reactivation: str = None
     use_census_permissions: bool = None
     format: dict = None
+    cloud_secure_tenant_id: str = None
+    max_rule_search_provider_consumer_entities: int = None
+    total_internet_address_space: int = None
+    total_lateral_address_space: int = None
 
 
 @dataclass
@@ -46,8 +50,14 @@ class EventSettings(Reference):
 @dataclass
 @pce_api('report_settings', endpoint='/settings/reports')
 class ReportSettings(Reference):
-    """Represents report settings in the PCE."""
-    max_report_size: int = None
+    """Represents report settings in the PCE.
+
+    ``max_report_size`` is retained as a deprecated field; the current API
+    exposes ``max_queued_reports`` and ``report_retention_days``.
+    """
+    max_queued_reports: int = None
+    report_retention_days: int = None
+    max_report_size: int = None  # deprecated / not returned by current PCEs
 
 
 @dataclass

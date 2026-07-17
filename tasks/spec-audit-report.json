@@ -303,27 +303,6 @@
     ]
   },
   {
-    "type": "missing_field",
-    "api": "ldap_configs",
-    "model": "LDAPConfig",
-    "schema": "authentication_settings_ldap_configs_get",
-    "fields": [
-      "authentication_method",
-      "bind_distinguished_name",
-      "full_name_attribute",
-      "insecure_disable_tls_certificate_verification",
-      "is_bind_password_set",
-      "pce_fqdn",
-      "request_timeout_seconds",
-      "tls_ca_bundle",
-      "user_base_distinguished_name",
-      "user_base_filter",
-      "user_distinguished_name_pattern",
-      "user_memberof_attribute",
-      "username_attribute"
-    ]
-  },
-  {
     "type": "extra_field",
     "api": "ldap_configs",
     "model": "LDAPConfig",
@@ -423,18 +402,6 @@
     ]
   },
   {
-    "type": "missing_field",
-    "api": "org_settings",
-    "model": "OrgSettings",
-    "schema": "settings_get",
-    "fields": [
-      "cloud_secure_tenant_id",
-      "max_rule_search_provider_consumer_entities",
-      "total_internet_address_space",
-      "total_lateral_address_space"
-    ]
-  },
-  {
     "type": "extra_field",
     "api": "org_settings",
     "model": "OrgSettings",
@@ -464,23 +431,6 @@
     ]
   },
   {
-    "type": "missing_field",
-    "api": "password_policy",
-    "model": "PasswordPolicy",
-    "schema": "authentication_settings_password_policy_get",
-    "fields": [
-      "expire_time_days",
-      "min_changed_characters",
-      "min_characters_per_type",
-      "require_type_lowercase",
-      "require_type_number",
-      "require_type_symbol",
-      "require_type_uppercase",
-      "updated_at",
-      "updated_by"
-    ]
-  },
-  {
     "type": "extra_field",
     "api": "password_policy",
     "model": "PasswordPolicy",
@@ -488,17 +438,6 @@
     "fields": [
       "min_characters_for_change_of_password",
       "require_type_count"
-    ]
-  },
-  {
-    "type": "missing_field",
-    "api": "report_schedules",
-    "model": "ReportSchedule",
-    "schema": "report_schedules_get",
-    "fields": [
-      "report_generation_frequency",
-      "scheduled_at",
-      "send_by_email"
     ]
   },
   {
@@ -514,33 +453,12 @@
     ]
   },
   {
-    "type": "missing_field",
-    "api": "report_settings",
-    "model": "ReportSettings",
-    "schema": "settings_reports_get",
-    "fields": [
-      "max_queued_reports",
-      "report_retention_days"
-    ]
-  },
-  {
     "type": "extra_field",
     "api": "report_settings",
     "model": "ReportSettings",
     "schema": "settings_reports_get",
     "fields": [
       "max_report_size"
-    ]
-  },
-  {
-    "type": "missing_field",
-    "api": "report_templates",
-    "model": "ReportTemplate",
-    "schema": "report_templates_get",
-    "fields": [
-      "enabled",
-      "report_parameters",
-      "show_in_ui"
     ]
   },
   {
@@ -551,17 +469,6 @@
     "fields": [
       "format",
       "template_type"
-    ]
-  },
-  {
-    "type": "missing_field",
-    "api": "reports",
-    "model": "Report",
-    "schema": "reports_get",
-    "fields": [
-      "generated_at",
-      "progress_percentage",
-      "send_by_email"
     ]
   },
   {
@@ -600,31 +507,6 @@
     "schema": "sec_policy_rule_sets_sec_rules_get",
     "fields": [
       "egress_services"
-    ]
-  },
-  {
-    "type": "missing_field",
-    "api": "saml_configs",
-    "model": "SAMLConfig",
-    "schema": "authentication_settings_saml_configs_get",
-    "fields": [
-      "authn_context",
-      "cluster_fqdn",
-      "consumer_logout_url",
-      "consumer_service_url",
-      "created_at",
-      "created_by",
-      "force_authn",
-      "idp_cert",
-      "idp_slo_target_url",
-      "idp_sso_target_url",
-      "issuer",
-      "name_identifier_format",
-      "pce_signing_cert",
-      "pce_signing_cert_expires_at",
-      "sign_authn_request",
-      "updated_at",
-      "updated_by"
     ]
   },
   {
