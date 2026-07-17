@@ -91,35 +91,27 @@ def pce_api(name: str, endpoint: str = None, is_sec_policy=False, is_global=Fals
     By default, registers the endpoint as /{name}, but the endpoint can also be
     specified in the decorator function call.
 
-    For example:
+    For example::
 
-        >>> @pce_api('labels', endpoint='/labels')
-        >>> class Label(IllumioObject):
-        ...     ...
-        >>> pce = PolicyComputeEngine(...)
-        >>> # the 'labels' name is registered, and so we can
-        >>> # call /labels endpoints through the _PCEObjectAPI interface
-        >>> labels = pce.labels.get()
-        >>> labels
-    [
-        Label(
-            href='/orgs/1/labels/1',
-            key='role',
-            value='R-DB',
+        @pce_api('labels', endpoint='/labels')
+        class Label(IllumioObject):
             ...
-        ),
-        ...
-    ]
+
+        # the 'labels' name is registered, so we can call /labels
+        # endpoints through the _PCEObjectAPI interface
+        pce = PolicyComputeEngine(...)
+        labels = pce.labels.get()
 
     Args:
-        name (str): the name of the API. used as a PolicyComputeEngine attribute name
-            to generate the API interface.
-        endpoint (str, optional): _description_. Defaults to None.
-        is_sec_policy (bool, optional): whether or not the object reflects a security
-            policy API with the sec_policy/{pversion} prefix. Defaults to False.
-        is_global (bool, optional): whether or not the object reflects a global API,
-            such as /health or /users. These APIs operate on the entire PCE rather
-            than a single tenant, and don't need the /orgs/{org_id} prefix.
+        name (str): the name of the API, used as a PolicyComputeEngine attribute
+            name to generate the API interface.
+        endpoint (str, optional): the endpoint path. Defaults to ``/{name}``.
+        is_sec_policy (bool, optional): whether the object reflects a security
+            policy API with the ``sec_policy/{pversion}`` prefix. Defaults to False.
+        is_global (bool, optional): whether the object reflects a global API,
+            such as ``/health`` or ``/users``. These APIs operate on the entire
+            PCE rather than a single tenant, and don't need the ``/orgs/{org_id}``
+            prefix. Defaults to False.
     """
 
     def _decorator(cls):

@@ -21,74 +21,71 @@ Illumio Core Python API Client
     :alt: Python Version Support Badge
 
 The **illumio** python library exposes Policy Compute Engine API endpoints
-through an easy-to-use interface.
+through an easy-to-use interface. It is a community-maintained fork of
+`illumio/illumio-py <https://github.com/illumio/illumio-py>`_ (the import package
+is still ``illumio``), compatible with Illumio Core PCE versions 21.2 and up.
 
-**illumio** is compatible with Illumio Core PCE versions 21.2 and up.
-
-Already have **illumio** installed and ready to get started?
-Check out the :ref:`Quickstart Guide <quickstart>`.
-
-If not, see the :ref:`Install Guide <install>`, or just run::
+Install it and take advantage of the PCE's APIs in just a few lines of code::
 
    $ python -m pip install illumio-py-open
 
-----------------------------------
-
-Take advantage of the Illumio PCE's powerful APIs in just a few lines of code::
+.. code-block:: python
 
    >>> from illumio import PolicyComputeEngine
    >>> pce = PolicyComputeEngine('my.pce.com', port='443', org_id='1')
    >>> pce.set_credentials('api_key', 'api_secret')
    >>> workloads = pce.workloads.get(
-   ...     params={
-   ...         'managed': True,
-   ...         'enforcement_mode': 'visibility_only'
-   ...     }
+   ...     params={'managed': True, 'enforcement_mode': 'visibility_only'}
    ... )
-   >>> workloads
-   [
-      Workload(
-         href='/orgs/12/workloads/c754a713-2bde-4427-af1f-bff145be509b',
-         ...
-      ),
-      ...
-   ]
 
-User Guide
-----------
+----------------------------------
 
-These guides provide an introduction to using the **illumio** library,
-common use-cases, and show how to manage the various policy objects and
-functions in the PCE.
+How the docs are organized
+--------------------------
+
+The documentation is split by what you're trying to do:
+
+- **Getting started** — install the client and follow a hands-on path from your
+  first connection to your first policy. Start here if you're new.
+- **Guides** — task-focused recipes for building segmentation policy, working
+  with deny rules, provisioning, and more.
+- **Concepts** — how the client is designed: the object model, the ``@pce_api``
+  registry, policy versioning, and org scoping.
+- **Reference** — the complete, generated API for every class and method.
 
 .. toctree::
-   :caption: User Guide
+   :caption: Getting started
    :maxdepth: 2
 
-   user/install
-   user/quickstart
-   user/usecases
-   user/advanced
-
-API Documentation
------------------
-
-Full API documentation on classes, functions, and methods that make up the
-`illumio` library can be found here.
+   getting-started/install
+   getting-started/quickstart
 
 .. toctree::
-   :caption: illumio API
+   :caption: Guides
    :maxdepth: 2
 
-   api
-
-Development
------------
+   guides/security-policy
+   guides/advanced-usage
 
 .. toctree::
-   :caption: Development
+   :caption: Concepts
    :maxdepth: 1
 
-   dev/changelog
+   concepts/architecture
+   concepts/object-model
+   concepts/policy-versioning
+   concepts/org-scoping
+
+.. toctree::
+   :caption: Reference
+   :maxdepth: 2
+
+   reference/index
+
+.. toctree::
+   :caption: Project
+   :maxdepth: 1
+
+   project/changelog
 
 * :ref:`genindex`
