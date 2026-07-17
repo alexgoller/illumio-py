@@ -93,4 +93,25 @@ the real allow `sec_rule` schema has no `action` field.
 **Behavioral proof:** `DenyRule` → `POST …/rule_sets/3/deny_rules` (override=false);
 `OverrideDenyRule` → same endpoint (override=true).
 
-Full unit suite: 331 passed.
+---
+
+## Third pass — LIVE PCE validation (read-only)
+
+User provided `.env` with real PCE access (SaaS, poc4.illum.io). Read-only GET probes
+confirmed the model is 100% correct:
+
+- `GET …/rule_sets/{id}/deny_rules` → 200; real keys EXACTLY match the DenyRule model
+  (`override`, `egress_services`, `all_ips_except_*`, network_type, unscoped_consumers,
+  ... — no priority/name/resolve_labels_as/overrides).
+- `GET …/rule_sets/{id}/override_deny_rules` → **404** — confirms there is NO separate
+  override-deny endpoint; OverrideDenyRule correctly routes to `/deny_rules`.
+- Real ruleset embeds a single `deny_rules` array (holds both kinds) and has **no
+  `override_deny_rules` field** → removed `RuleSet.override_deny_rules`; deny_rules now
+  holds override rules (flagged by `override`).
+- `pce.deny_rules.get(parent=ruleset)` returns typed DenyRule objects; round-trip leaks
+  no invented fields. `enforcement_boundaries` endpoint exists but is empty (dead).
+
+Full unit suite: 333 passed. Deny rules are DONE and live-validated.
+
+**Env note:** venv has a stale non-editable `illumio` in site-packages shadowing the
+working tree for out-of-repo scripts; use PYTHONPATH or `pip install -e .`.

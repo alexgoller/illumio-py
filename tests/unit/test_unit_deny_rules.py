@@ -193,28 +193,38 @@ class TestOverrideDenyRule:
 
 
 class TestDenyRulesInRuleSet:
-    """Deny rules embedded within their parent RuleSet, distinguished by override."""
+    """Deny rules embedded within their parent RuleSet.
 
-    def test_ruleset_deny_and_override_arrays(self, pce):
+    A real ruleset exposes a single ``deny_rules`` array holding both ordinary
+    deny rules (``override=False``) and override-deny rules (``override=True``);
+    there is no separate ``override_deny_rules`` array.
+    """
+
+    def test_ruleset_deny_rules_array_holds_both_kinds(self, pce):
         ruleset = pce.rule_sets.get_by_reference(MOCK_RULE_SET_HREF)
         assert ruleset.name == "RS-WITH-DENY-RULES"
-        assert len(ruleset.deny_rules) == 1
-        assert isinstance(ruleset.deny_rules[0], DenyRule)
-        assert ruleset.deny_rules[0].override is False
-        assert len(ruleset.override_deny_rules) == 1
-        assert isinstance(ruleset.override_deny_rules[0], OverrideDenyRule)
-        assert ruleset.override_deny_rules[0].override is True
+        assert not hasattr(ruleset, 'override_deny_rules') or \
+            'override_deny_rules' not in {f.name for f in RuleSet.__dataclass_fields__.values()}
+        assert len(ruleset.deny_rules) == 2
+        assert all(isinstance(r, DenyRule) for r in ruleset.deny_rules)
+        overrides = sorted(r.override for r in ruleset.deny_rules)
+        assert overrides == [False, True]
 
     def test_ruleset_deny_rules_json_encoding(self, pce):
         ruleset = pce.rule_sets.get_by_reference(MOCK_RULE_SET_HREF)
         j = ruleset.to_json()
-        assert 'priority' not in j['deny_rules'][0]
-        assert 'overrides' not in j['override_deny_rules'][0]
-        assert j['override_deny_rules'][0]['override'] is True
+        assert 'override_deny_rules' not in j
+        for dr in j['deny_rules']:
+            assert 'priority' not in dr
+            assert 'overrides' not in dr
 
 
 class TestRuleSetModel:
+    def test_ruleset_has_no_override_deny_rules_field(self):
+        field_names = {f.name for f in RuleSet.__dataclass_fields__.values()}
+        assert 'deny_rules' in field_names
+        assert 'override_deny_rules' not in field_names
+
     def test_ruleset_empty_deny_rules(self):
-        ruleset = RuleSet(name='RS-Empty-Deny', deny_rules=[], override_deny_rules=[])
+        ruleset = RuleSet(name='RS-Empty-Deny', deny_rules=[])
         assert ruleset.deny_rules == []
-        assert ruleset.override_deny_rules == []

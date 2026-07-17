@@ -36,7 +36,6 @@
   ],
   "rules": [],
   "deny_rules": [],
-  "override_deny_rules": [],
   "ip_tables_rules": [],
   "caps": [
    "write",
@@ -80,7 +79,6 @@
   ],
   "rules": [],
   "deny_rules": [],
-  "override_deny_rules": [],
   "ip_tables_rules": [],
   "caps": [
    "write",
@@ -108,7 +106,6 @@
   ],
   "rules": [],
   "deny_rules": [],
-  "override_deny_rules": [],
   "ip_tables_rules": [],
   "caps": [
    "write",
@@ -167,9 +164,7 @@
      }
     ],
     "override": false
-   }
-  ],
-  "override_deny_rules": [
+   },
    {
     "href": "/orgs/1/sec_policy/draft/rule_sets/3/deny_rules/100",
     "name": "ODR-Allow-Admin-In-RuleSet",
