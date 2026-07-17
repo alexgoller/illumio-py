@@ -92,7 +92,7 @@ The full list can be found in the :ref:`API documentation <apiattributes>`.
 
 In addition to the CRUD operations shown above, the ``_PCEObjectAPI`` class also
 provides functions for asynchronous and batch operations - see the
-:ref:`Advanced Usage guide <advanced>` for details.
+:ref:`Reading large collections <guide-collections>` guide for details.
 
 .. note:: HTTP requests
     The **illumio** library uses **requests** under the hood to communicate with the PCE.

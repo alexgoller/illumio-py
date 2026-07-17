@@ -62,10 +62,18 @@ The documentation is split by what you're trying to do:
 
 .. toctree::
    :caption: Guides
-   :maxdepth: 2
+   :maxdepth: 1
 
    guides/security-policy
-   guides/advanced-usage
+   guides/connecting
+   guides/reading-collections
+   guides/provisioning
+   guides/workloads-and-vens
+   guides/virtual-services
+   guides/containers
+   guides/traffic-analysis
+   guides/access-management
+   guides/monitoring-and-reporting
 
 .. toctree::
    :caption: Concepts
