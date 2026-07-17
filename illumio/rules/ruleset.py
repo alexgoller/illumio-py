@@ -14,7 +14,7 @@ from typing import List
 from illumio.util import MutableObject, pce_api
 from illumio.policyobjects import LabelSet
 
-from .rule import Rule, DenyRule, OverrideDenyRule
+from .rule import Rule, DenyRule
 from .iptablesrule import IPTablesRule
 
 
@@ -29,9 +29,14 @@ class RuleSet(MutableObject):
 
     Rule sets can contain:
     - rules: Standard allow rules (sec_rules)
-    - deny_rules: Rules that explicitly block traffic (sec_deny_rules)
-    - override_deny_rules: Rules that override deny rules (sec_override_deny_rules)
+    - deny_rules: Block rules; each carries an ``override`` flag. Rules are
+      evaluated in the order override-deny (``override=True``) > allow > deny
+      (``override=False``). A ruleset exposes a single ``deny_rules`` array
+      holding both kinds — there is no separate override-deny array.
     - ip_tables_rules: Custom IP tables rules
+
+    Deny rules are created against a ruleset by passing it as the ``parent``
+    argument, e.g. ``pce.deny_rules.create(rule, parent=ruleset)``.
 
     See https://docs.illumio.com/core/21.5/Content/Guides/security-policy/create-security-policy/rulesets.htm
 
@@ -69,7 +74,6 @@ class RuleSet(MutableObject):
     scopes: List[LabelSet] = None
     rules: List[Rule] = None
     deny_rules: List[DenyRule] = None
-    override_deny_rules: List[OverrideDenyRule] = None
     ip_tables_rules: List[IPTablesRule] = None
 
 

@@ -1,7 +1,13 @@
-# illumio  
+# illumio-py-open
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?color=orange)](https://opensource.org/licenses/Apache-2.0)
-[![Latest Release](https://img.shields.io/github/v/release/illumio/illumio-py?label=Latest%20Release)](https://github.com/illumio/illumio-py/releases/latest)
+
+> **Community fork.** `illumio-py-open` is a community-maintained fork of
+> [illumio/illumio-py](https://github.com/illumio/illumio-py), updated to track current
+> Illumio Core REST APIs. It is **not an official Illumio product and is not endorsed by
+> Illumio.** It is distributed under the Apache License 2.0 (see [NOTICE](NOTICE) and
+> [LICENSE](LICENSE)). The import package is still `illumio`, so existing code keeps working:
+> `from illumio import PolicyComputeEngine`.
 
 Illumio Policy Compute Engine REST client for python 3. Provides full API coverage of the Illumio PCE REST API with 56 registered CRUD endpoints and 67 custom methods for specialized operations.
 
@@ -36,16 +42,17 @@ You can find API documentation, code examples, and usage guides on our [readthed
 
 ## Installation  
 
-The `illumio` library is now [available on pypi](https://pypi.org/project/illumio/)!  
+Once published, the fork will be available on PyPI as `illumio-py-open` (the import name
+remains `illumio`):
 
 ```sh
-$ python -m pip install illumio
+$ python -m pip install illumio-py-open
 ```
 
 To build and install from source  
 
 ```sh
-$ git clone git@github.com:illumio/illumio-py.git
+$ git clone git@github.com:alexgoller/illumio-py.git
 $ cd illumio-py
 $ make
 ```

@@ -24,8 +24,9 @@ class TestWorkloadNewFields:
     """Test new Workload model fields from PCE v24.2+."""
 
     def test_workload_with_risk_summary(self):
-        """Test Workload with risk_summary field."""
-        workload_json = {
+        """risk_summary decodes into typed RiskSummary/Ransomware objects."""
+        from illumio.workloads import RiskSummary, Ransomware
+        workload = Workload.from_json({
             "href": "/orgs/1/workloads/test-uuid",
             "name": "test-workload",
             "hostname": "test.example.com",
@@ -37,31 +38,45 @@ class TestWorkloadNewFields:
                     "last_updated_at": "2024-02-01T12:00:00.000Z"
                 }
             }
-        }
-        
-        workload = Workload.from_json(workload_json)
-        
-        assert workload.href == "/orgs/1/workloads/test-uuid"
-        assert hasattr(workload, 'risk_summary')
-        # risk_summary is decoded as dict since we haven't defined the class yet
-        if workload.risk_summary:
-            assert 'ransomware' in workload.risk_summary
+        })
+        assert isinstance(workload.risk_summary, RiskSummary)
+        assert isinstance(workload.risk_summary.ransomware, Ransomware)
+        assert workload.risk_summary.ransomware.workload_exposure_severity == "medium"
+        assert workload.risk_summary.ransomware.ransomware_protection_percent == 75.5
+        # round-trip preserves the nested structure
+        j = workload.to_json()
+        assert j["risk_summary"]["ransomware"]["workload_exposure_severity"] == "medium"
 
-    def test_workload_managed_field(self):
-        """Test Workload with managed boolean field."""
-        workload_json = {
+    def test_workload_managed_and_nat_fields(self):
+        """managed and datacenter_nat_1to1 are typed boolean fields."""
+        workload = Workload.from_json({
             "href": "/orgs/1/workloads/test-uuid",
             "name": "managed-workload",
-            "hostname": "managed.example.com",
             "managed": True,
-            "online": True
-        }
-        
-        workload = Workload.from_json(workload_json)
-        
-        assert workload.href == "/orgs/1/workloads/test-uuid"
-        # managed is an extra field not in dataclass, but should be accessible
-        assert hasattr(workload, 'managed') or 'managed' in workload_json
+            "datacenter_nat_1to1": False,
+        })
+        assert workload.managed is True
+        assert workload.datacenter_nat_1to1 is False
+        field_names = {f.name for f in Workload.__dataclass_fields__.values()}
+        assert {'managed', 'datacenter_nat_1to1'} <= field_names
+
+    def test_workload_container_policy_convergence_status(self):
+        """container_policy_convergence_status decodes into a typed object."""
+        from illumio.workloads import ContainerPolicyConvergenceStatus
+        workload = Workload.from_json({
+            "href": "/orgs/1/workloads/test-uuid",
+            "container_policy_convergence_status": {
+                "total_pods_count": 5,
+                "success_pods_count": 5,
+                "pending_pods_count": 0,
+                "errors_count": 0,
+                "acked_at": "2024-02-01T12:00:00.000Z",
+            }
+        })
+        cs = workload.container_policy_convergence_status
+        assert isinstance(cs, ContainerPolicyConvergenceStatus)
+        assert cs.total_pods_count == 5
+        assert cs.errors_count == 0
 
     def test_workload_enforcement_mode_enum(self):
         """Test enforcement_mode with EnforcementMode enum."""

@@ -1,0 +1,942 @@
+[
+  {
+    "type": "missing_field",
+    "api": "access_restrictions",
+    "model": "AccessRestriction",
+    "schema": "orgs_access_restrictions_get",
+    "fields": [
+      "enforcement_exclusions"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "access_restrictions",
+    "model": "AccessRestriction",
+    "schema": "orgs_access_restrictions_get",
+    "fields": [
+      "type"
+    ]
+  },
+  {
+    "type": "no_schema",
+    "api": "app_group_summary",
+    "model": "AppGroupSummary",
+    "detail": "no schema resolved (schema_base=None)"
+  },
+  {
+    "type": "missing_field",
+    "api": "auth_security_principals",
+    "model": "AuthSecurityPrincipal",
+    "schema": "orgs_auth_security_principals_get",
+    "fields": [
+      "access_restriction",
+      "uuid"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "auth_security_principals",
+    "model": "AuthSecurityPrincipal",
+    "schema": "orgs_auth_security_principals_get",
+    "fields": [
+      "sid"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "authentication_settings",
+    "model": "AuthenticationSettings",
+    "schema": "authentication_settings_get",
+    "fields": [
+      "authentication_type"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "authentication_settings",
+    "model": "AuthenticationSettings",
+    "schema": "authentication_settings_get",
+    "fields": [
+      "mfa_config",
+      "session_timeout_minutes"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "container_clusters",
+    "model": "ContainerCluster",
+    "schema": "container_clusters_get",
+    "fields": [
+      "cluster_mode",
+      "datacenter_nat_1to1"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "container_clusters",
+    "model": "ContainerCluster",
+    "schema": "container_clusters_get",
+    "fields": [
+      "container_cluster_token"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "container_workload_profiles",
+    "model": "ContainerWorkloadProfile",
+    "schema": "container_clusters_container_workload_profiles_get",
+    "fields": [
+      "visibility_level"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "core_service_types",
+    "model": "CoreServiceType",
+    "schema": "core_service_types_get",
+    "fields": [
+      "labels",
+      "num_optional_ports_required",
+      "optional_ports",
+      "priority",
+      "required_ports"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "core_service_types",
+    "model": "CoreServiceType",
+    "schema": "core_service_types_get",
+    "fields": [
+      "num_workloads",
+      "port",
+      "protocol"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "detected_core_services",
+    "model": "DetectedCoreService",
+    "schema": "detected_core_services_get",
+    "fields": [
+      "action",
+      "confidence",
+      "feedback",
+      "labels_applied",
+      "last_detected_at",
+      "method_name"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "detected_core_services",
+    "model": "DetectedCoreService",
+    "schema": "detected_core_services_get",
+    "fields": [
+      "detected_at",
+      "port",
+      "protocol"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "discovered_virtual_servers",
+    "model": "DiscoveredVirtualServer",
+    "schema": "discovered_virtual_servers_get",
+    "fields": [
+      "created_by",
+      "dvs_identifier",
+      "local_ips",
+      "mode",
+      "nfc",
+      "service_checks",
+      "slb",
+      "snat_pool_ips",
+      "snat_type",
+      "updated_by",
+      "virtual_server"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "discovered_virtual_servers",
+    "model": "DiscoveredVirtualServer",
+    "schema": "discovered_virtual_servers_get",
+    "fields": [
+      "vip_address",
+      "vip_proto"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "enforcement_boundaries",
+    "model": "EnforcementBoundary",
+    "schema": "sec_policy_enforcement_boundaries_get",
+    "fields": [
+      "created_at",
+      "created_by",
+      "deleted_at",
+      "deleted_by",
+      "enabled",
+      "update_type",
+      "updated_at",
+      "updated_by"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "events",
+    "model": "Event",
+    "schema": "events_get",
+    "fields": [
+      "event_id",
+      "org_id",
+      "version"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "events",
+    "model": "Event",
+    "schema": "events_get",
+    "fields": [
+      "event",
+      "info",
+      "uuid"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "firewall_settings",
+    "model": "FirewallSetting",
+    "schema": "sec_policy_firewall_settings_get",
+    "fields": [
+      "allow_captive_portal_outbound",
+      "ip_forwarding_enabled_scopes",
+      "rule_hit_count_enabled_scopes"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "firewall_settings",
+    "model": "FirewallSetting",
+    "schema": "sec_policy_firewall_settings_get",
+    "fields": [
+      "allow_dhcp_client",
+      "allow_ipv6",
+      "allow_traceroute",
+      "ipv6_mode",
+      "log_dropped_broadcast",
+      "log_dropped_multicast",
+      "network_detection_mode"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "ip_lists",
+    "model": "IPList",
+    "schema": "sec_policy_ip_lists_get",
+    "fields": [
+      "ip_list_attribute"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "kubernetes_workloads",
+    "model": "KubernetesWorkload",
+    "schema": "kubernetes_workloads_get",
+    "fields": [
+      "container_cluster_service",
+      "container_policy_convergence_status",
+      "container_workload_profile",
+      "enforcement_mode",
+      "metadata",
+      "private_ip_addresses",
+      "security_policy_applied_at",
+      "security_policy_sync_state",
+      "visibility_level"
+    ]
+  },
+  {
+    "type": "no_schema",
+    "api": "label_dimensions",
+    "model": "LabelDimension",
+    "detail": "no schema resolved (schema_base=None)"
+  },
+  {
+    "type": "extra_field",
+    "api": "label_groups",
+    "model": "LabelGroup",
+    "schema": "sec_policy_label_groups_get",
+    "fields": [
+      "deleted",
+      "value"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "label_mapping_rules",
+    "model": "LabelMappingRule",
+    "schema": "label_mapping_rules_get",
+    "fields": [
+      "expression",
+      "overwrite"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "label_mapping_rules",
+    "model": "LabelMappingRule",
+    "schema": "label_mapping_rules_get",
+    "fields": [
+      "match_criteria",
+      "order"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "labels",
+    "model": "Label",
+    "schema": "labels_get",
+    "fields": [
+      "usage"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "ldap_configs",
+    "model": "LDAPConfig",
+    "schema": "authentication_settings_ldap_configs_get",
+    "fields": [
+      "authentication_method",
+      "bind_distinguished_name",
+      "full_name_attribute",
+      "insecure_disable_tls_certificate_verification",
+      "is_bind_password_set",
+      "pce_fqdn",
+      "request_timeout_seconds",
+      "tls_ca_bundle",
+      "user_base_distinguished_name",
+      "user_base_filter",
+      "user_distinguished_name_pattern",
+      "user_memberof_attribute",
+      "username_attribute"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "ldap_configs",
+    "model": "LDAPConfig",
+    "schema": "authentication_settings_ldap_configs_get",
+    "fields": [
+      "authentication_type",
+      "base_dn",
+      "bind_type",
+      "password",
+      "request_timeout",
+      "tls_enabled",
+      "user_dn"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "network_devices",
+    "model": "NetworkDevice",
+    "schema": "network_devices_get",
+    "fields": [
+      "configure",
+      "enforcement_instructions_ack_href",
+      "enforcement_instructions_ack_timestamp",
+      "enforcement_instructions_data_href",
+      "enforcement_instructions_data_timestamp",
+      "enforcement_instructions_generation_in_progress",
+      "network_endpoints"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "network_devices",
+    "model": "NetworkDevice",
+    "schema": "network_devices_get",
+    "fields": [
+      "rules_href"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "network_endpoints",
+    "model": "NetworkEndpoint",
+    "schema": "network_devices_network_endpoints_get",
+    "fields": [
+      "config",
+      "status",
+      "workload_discovery",
+      "workloads"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "network_endpoints",
+    "model": "NetworkEndpoint",
+    "schema": "network_devices_network_endpoints_get",
+    "fields": [
+      "endpoint_type",
+      "port_id",
+      "vlan_id",
+      "workload"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "network_enforcement_nodes",
+    "model": "NetworkEnforcementNode",
+    "schema": "network_enforcement_nodes_get",
+    "fields": [
+      "active_pce_fqdn",
+      "last_status_at",
+      "network_devices",
+      "org_id",
+      "public_ip",
+      "supported_devices",
+      "target_pce_fqdn",
+      "uptime_seconds",
+      "uuid"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "network_enforcement_nodes",
+    "model": "NetworkEnforcementNode",
+    "schema": "network_enforcement_nodes_get",
+    "fields": [
+      "network_devices_count",
+      "status"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "optional_features",
+    "model": "OptionalFeature",
+    "schema": "optional_features_get",
+    "fields": [
+      "preview"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "org_settings",
+    "model": "OrgSettings",
+    "schema": "settings_get",
+    "fields": [
+      "cloud_secure_tenant_id",
+      "max_rule_search_provider_consumer_entities",
+      "total_internet_address_space",
+      "total_lateral_address_space"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "org_settings",
+    "model": "OrgSettings",
+    "schema": "settings_get",
+    "fields": [
+      "automatic_clone_reactivation",
+      "clone_detection_enabled",
+      "format",
+      "label_display"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "pairing_profiles",
+    "model": "PairingProfile",
+    "schema": "pairing_profiles_get",
+    "fields": [
+      "last_pairing_key_generated_at",
+      "last_pairing_key_generated_by",
+      "log_traffic",
+      "log_traffic_lock",
+      "mode",
+      "mode_lock",
+      "status",
+      "status_lock",
+      "ven_type"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "password_policy",
+    "model": "PasswordPolicy",
+    "schema": "authentication_settings_password_policy_get",
+    "fields": [
+      "expire_time_days",
+      "min_changed_characters",
+      "min_characters_per_type",
+      "require_type_lowercase",
+      "require_type_number",
+      "require_type_symbol",
+      "require_type_uppercase",
+      "updated_at",
+      "updated_by"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "password_policy",
+    "model": "PasswordPolicy",
+    "schema": "authentication_settings_password_policy_get",
+    "fields": [
+      "min_characters_for_change_of_password",
+      "require_type_count"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "report_schedules",
+    "model": "ReportSchedule",
+    "schema": "report_schedules_get",
+    "fields": [
+      "report_generation_frequency",
+      "scheduled_at",
+      "send_by_email"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "report_schedules",
+    "model": "ReportSchedule",
+    "schema": "report_schedules_get",
+    "fields": [
+      "enabled",
+      "report_type",
+      "schedule",
+      "send_to"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "report_settings",
+    "model": "ReportSettings",
+    "schema": "settings_reports_get",
+    "fields": [
+      "max_queued_reports",
+      "report_retention_days"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "report_settings",
+    "model": "ReportSettings",
+    "schema": "settings_reports_get",
+    "fields": [
+      "max_report_size"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "report_templates",
+    "model": "ReportTemplate",
+    "schema": "report_templates_get",
+    "fields": [
+      "enabled",
+      "report_parameters",
+      "show_in_ui"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "report_templates",
+    "model": "ReportTemplate",
+    "schema": "report_templates_get",
+    "fields": [
+      "format",
+      "template_type"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "reports",
+    "model": "Report",
+    "schema": "reports_get",
+    "fields": [
+      "generated_at",
+      "progress_percentage",
+      "send_by_email"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "reports",
+    "model": "Report",
+    "schema": "reports_get",
+    "fields": [
+      "report_type",
+      "send_to"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "roles",
+    "model": "Role",
+    "schema": "orgs_roles_get",
+    "fields": [
+      "access_level",
+      "display_name"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "rule_sets",
+    "model": "RuleSet",
+    "schema": "sec_policy_rule_sets_get",
+    "fields": [
+      "deny_rules"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "rules",
+    "model": "Rule",
+    "schema": "sec_policy_rule_sets_sec_rules_get",
+    "fields": [
+      "egress_services"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "saml_configs",
+    "model": "SAMLConfig",
+    "schema": "authentication_settings_saml_configs_get",
+    "fields": [
+      "authn_context",
+      "cluster_fqdn",
+      "consumer_logout_url",
+      "consumer_service_url",
+      "created_at",
+      "created_by",
+      "force_authn",
+      "idp_cert",
+      "idp_slo_target_url",
+      "idp_sso_target_url",
+      "issuer",
+      "name_identifier_format",
+      "pce_signing_cert",
+      "pce_signing_cert_expires_at",
+      "sign_authn_request",
+      "updated_at",
+      "updated_by"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "saml_configs",
+    "model": "SAMLConfig",
+    "schema": "authentication_settings_saml_configs_get",
+    "fields": [
+      "certificate",
+      "issuer_url",
+      "pce_fqdn",
+      "slo_url",
+      "sso_url"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "security_principals",
+    "model": "SecurityPrincipal",
+    "schema": "security_principals_get",
+    "fields": [
+      "deleted",
+      "id",
+      "members",
+      "used_by_ruleset"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "service_accounts",
+    "model": "ServiceAccount",
+    "schema": "service_accounts_get",
+    "fields": [
+      "access_restriction",
+      "api_keys"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "service_accounts",
+    "model": "ServiceAccount",
+    "schema": "service_accounts_get",
+    "fields": [
+      "api_key_id",
+      "api_key_secret",
+      "last_login"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "service_bindings",
+    "model": "ServiceBinding",
+    "schema": "service_bindings_get",
+    "fields": [
+      "bound_service"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "service_bindings",
+    "model": "ServiceBinding",
+    "schema": "service_bindings_get",
+    "fields": [
+      "virtual_service"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "services",
+    "model": "Service",
+    "schema": "sec_policy_services_get",
+    "fields": [
+      "description_url",
+      "risk_details"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "services",
+    "model": "Service",
+    "schema": "sec_policy_services_get",
+    "fields": [
+      "windows_egress_services"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "slbs",
+    "model": "SLB",
+    "schema": "slbs_get",
+    "fields": [
+      "device_type",
+      "network_enforcement_node",
+      "status"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "slbs",
+    "model": "SLB",
+    "schema": "slbs_get",
+    "fields": [
+      "dvs"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "support_bundle_requests",
+    "model": "SupportBundleRequest",
+    "schema": "support_bundle_requests_get",
+    "fields": [
+      "completed_at",
+      "created_by",
+      "download_url",
+      "ending_at",
+      "include_logs",
+      "name",
+      "starting_at"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "support_bundle_requests",
+    "model": "SupportBundleRequest",
+    "schema": "support_bundle_requests_get",
+    "fields": [
+      "requested_by",
+      "result",
+      "vens"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "system_events",
+    "model": "SystemEvent",
+    "schema": "system_events_get",
+    "fields": [
+      "action",
+      "event_id",
+      "org_id",
+      "resource_changes",
+      "version"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "system_events",
+    "model": "SystemEvent",
+    "schema": "system_events_get",
+    "fields": [
+      "info"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "trusted_proxy_ips",
+    "model": "TrustedProxyIPs",
+    "schema": "settings_trusted_proxy_ips_get",
+    "fields": [
+      "max_trusted_proxy_ips_per_region"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "users",
+    "model": "User",
+    "schema": "users_get",
+    "fields": [
+      "created_at",
+      "display_name",
+      "id",
+      "permissions",
+      "updated_at"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "vens",
+    "model": "VEN",
+    "schema": "vens_get",
+    "fields": [
+      "unpair_allowed"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "virtual_servers",
+    "model": "VirtualServer",
+    "schema": "sec_policy_virtual_servers_get",
+    "fields": [
+      "dvs_identifier",
+      "dvs_name"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "vulnerabilities",
+    "model": "Vulnerability",
+    "schema": "vulnerabilities_get",
+    "fields": [
+      "severity"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "vulnerability_reports",
+    "model": "VulnerabilityReport",
+    "schema": "vulnerability_reports_get",
+    "fields": [
+      "exported_at"
+    ]
+  },
+  {
+    "type": "missing_field",
+    "api": "workload_settings",
+    "model": "WorkloadSettings",
+    "schema": "settings_workloads_get",
+    "fields": [
+      "ven_uninstall_timeout_hours",
+      "workload_disconnected_notification_seconds"
+    ]
+  },
+  {
+    "type": "extra_field",
+    "api": "workloads",
+    "model": "Workload",
+    "schema": "workloads_get",
+    "fields": [
+      "ignored_interface_names",
+      "num_enforcement_boundaries",
+      "os_type",
+      "visibility_level"
+    ]
+  },
+  {
+    "type": "uncovered_class",
+    "api": "agents"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "api_keys"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "app_groups"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "datafiles"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "detected_core_services_summaries"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "inactive_ven_cleanup_schedules"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "ip_list_attributes"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "login_users"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "org_api_keys"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "org_auth_security_principals"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "org_permissions"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "sec_policies"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "sec_policy_allows"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "security_principal_users"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "service_account_api_keys"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "traffic_flows"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "traffic_flows_async_queries"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "ven_software_images"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "ven_software_releases"
+  },
+  {
+    "type": "uncovered_class",
+    "api": "workload_interfaces"
+  }
+]

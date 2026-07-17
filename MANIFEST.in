@@ -1,3 +1,18 @@
-# exclude git files from setup_scm inclusions
-exclude .gitignore
+# Keep LICENSE / NOTICE / README in the sdist.
+include LICENSE NOTICE README.md
+include illumio/py.typed
+
+# Exclude repo/dev/reference material from the distribution.
+# (setuptools_scm otherwise includes every git-tracked file in the sdist.)
+exclude .gitignore .coveragerc .readthedocs.yaml tox.ini Makefile CHANGELOG.rst UPDATE_REPORT.md CLAUDE.md
 prune .github
+prune tasks
+prune docs
+prune tests
+prune tools
+
+# Illumio API reference material — never shipped
+prune webservices-v2-experimental-26.3.0
+exclude illumio-v2-openapi-experimental-25.2.10.json
+exclude illumio-core-26.3-openapi.json
+recursive-exclude . *.schema.json

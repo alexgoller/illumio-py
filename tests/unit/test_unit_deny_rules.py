@@ -2,6 +2,15 @@
 
 """Unit tests for DenyRule and OverrideDenyRule.
 
+Deny rules live nested under a ruleset. There is a single deny-rule object
+type (schema ``deny_rules_get``) whose ``override`` boolean determines its
+precedence: ``override=true`` is an "override-deny" rule that takes precedence
+over allow rules, ``override=false`` (default) is an ordinary deny rule. The
+policy evaluation order is override-deny > allow > deny.
+
+``OverrideDenyRule`` is a thin convenience whose ``build`` defaults
+``override=True``; it targets the same ``/deny_rules`` endpoint as ``DenyRule``.
+
 Copyright:
     © 2024 Illumio
 
@@ -16,11 +25,17 @@ from typing import List
 import pytest
 
 from illumio.rules import DenyRule, OverrideDenyRule, RuleSet
+from illumio.policyobjects import Service, ServicePort
 
 MOCK_DENY_RULES = os.path.join(pytest.DATA_DIR, 'deny_rules.json')
 MOCK_OVERRIDE_DENY_RULES = os.path.join(pytest.DATA_DIR, 'override_deny_rules.json')
 MOCK_RULE_SETS = os.path.join(pytest.DATA_DIR, 'rule_sets.json')
 MOCK_RULE_SET_HREF = '/orgs/1/sec_policy/draft/rule_sets/3'
+MOCK_DENY_RULE_HREF = '/orgs/1/sec_policy/draft/rule_sets/3/deny_rules/1'
+MOCK_OVERRIDE_DENY_RULE_HREF = '/orgs/1/sec_policy/draft/rule_sets/3/deny_rules/10'
+
+# Fields defined by the real deny_rules_get schema that must NOT leak invented ones.
+INVENTED_FIELDS = {'priority', 'overrides'}
 
 
 @pytest.fixture(scope='module')
@@ -50,448 +65,166 @@ def deny_rules_mock(pce_object_mock, deny_rules, override_deny_rules, rule_sets)
 
 @pytest.fixture(autouse=True)
 def mock_requests(requests_mock, get_callback, post_callback, put_callback, delete_callback):
-    # Match both sec_policy paths and direct rule paths, including ruleset-scoped paths
-    deny_pattern = re.compile(r'/(sec_deny_rules|deny_rules)')
-    override_pattern = re.compile(r'/(sec_override_deny_rules|override_deny_rules)')
+    deny_pattern = re.compile(r'/deny_rules')
     ruleset_pattern = re.compile(r'/rule_sets')
-    
-    requests_mock.register_uri('GET', deny_pattern, json=get_callback)
-    requests_mock.register_uri('POST', deny_pattern, json=post_callback)
-    requests_mock.register_uri('PUT', deny_pattern, json=put_callback)
-    requests_mock.register_uri('DELETE', deny_pattern, json=delete_callback)
-    
-    requests_mock.register_uri('GET', override_pattern, json=get_callback)
-    requests_mock.register_uri('POST', override_pattern, json=post_callback)
-    requests_mock.register_uri('PUT', override_pattern, json=put_callback)
-    requests_mock.register_uri('DELETE', override_pattern, json=delete_callback)
-    
-    requests_mock.register_uri('GET', ruleset_pattern, json=get_callback)
-    requests_mock.register_uri('POST', ruleset_pattern, json=post_callback)
-    requests_mock.register_uri('PUT', ruleset_pattern, json=put_callback)
-    requests_mock.register_uri('DELETE', ruleset_pattern, json=delete_callback)
+
+    for verb, cb in (('GET', get_callback), ('POST', post_callback),
+                     ('PUT', put_callback), ('DELETE', delete_callback)):
+        requests_mock.register_uri(verb, deny_pattern, json=cb)
+        requests_mock.register_uri(verb, ruleset_pattern, json=cb)
+
+
+class TestDenyRuleModel:
+    """The DenyRule model matches the deny_rules_get schema."""
+
+    def test_no_invented_fields(self):
+        deny_fields = {f.name for f in DenyRule.__dataclass_fields__.values()}
+        assert INVENTED_FIELDS.isdisjoint(deny_fields)
+
+    def test_has_schema_fields(self):
+        deny_fields = {f.name for f in DenyRule.__dataclass_fields__.values()}
+        for field in ('providers', 'consumers', 'ingress_services', 'egress_services',
+                      'enabled', 'override', 'network_type', 'unscoped_consumers',
+                      'all_ips_except_for_in_consumers', 'all_ips_except_for_in_providers'):
+            assert field in deny_fields, field
+
+    def test_deny_has_no_resolve_labels_as(self):
+        """resolve_labels_as is an allow-rule field, not a deny-rule field."""
+        deny_fields = {f.name for f in DenyRule.__dataclass_fields__.values()}
+        assert 'resolve_labels_as' not in deny_fields
+
+    def test_deny_and_override_share_shape(self):
+        deny_fields = {f.name for f in DenyRule.__dataclass_fields__.values()}
+        override_fields = {f.name for f in OverrideDenyRule.__dataclass_fields__.values()}
+        assert deny_fields == override_fields
 
 
 class TestDenyRule:
-    """Test cases for DenyRule API."""
-
-    def test_get_deny_rules(self, pce):
-        """Test fetching deny rules."""
-        rules = pce.deny_rules.get()
-        assert len(rules) >= 2
-        assert all(isinstance(r, DenyRule) for r in rules)
+    """DenyRule CRUD, nested under a ruleset."""
 
     def test_get_deny_rule_by_reference(self, pce):
-        """Test fetching a single deny rule by href."""
-        rule = pce.deny_rules.get_by_reference("/orgs/1/sec_policy/draft/deny_rules/1")
-        assert rule.name == "DR-Block-SSH-External"
-        assert rule.priority == 100
-        assert rule.enabled == True
+        rule = pce.deny_rules.get_by_reference(MOCK_DENY_RULE_HREF)
+        assert rule.href == MOCK_DENY_RULE_HREF
+        assert rule.enabled is True
+        assert rule.override is False
+        assert rule.ingress_services[0].port == 22
 
-    def test_get_deny_rule_by_name(self, pce):
-        """Test fetching deny rule by name."""
-        rule = pce.deny_rules.get_by_name("DR-Block-SSH-External")
-        assert rule is not None
-        assert rule.priority == 100
+    def test_egress_services_decode(self, deny_rules):
+        rule = DenyRule.from_json(deny_rules[1])
+        assert rule.egress_services is not None
+        assert isinstance(rule.egress_services[0], Service)
+        assert rule.egress_services[0].href.endswith('/services/3')
 
-    def test_create_deny_rule(self, pce):
-        """Test creating a deny rule."""
+    def test_all_ips_except_decode(self, deny_rules):
+        rule = DenyRule.from_json(deny_rules[1])
+        assert rule.all_ips_except_for_in_consumers is True
+        assert rule.unscoped_consumers is True
+
+    def test_create_deny_rule_hits_deny_endpoint(self, pce):
         deny_rule = DenyRule.build(
             providers=['/orgs/1/labels/1'],
             consumers=['/orgs/1/labels/2'],
             ingress_services=[{'port': 80, 'proto': 6}],
-            name='DR-Test-Block-HTTP',
-            priority=50
         )
-        created = pce.deny_rules.create(deny_rule)
-        assert created.href is not None
-        assert 'deny_rules' in created.href
+        created = pce.deny_rules.create(deny_rule, parent=MOCK_RULE_SET_HREF)
+        assert '/rule_sets/3/deny_rules' in created.href
 
-    def test_deny_rule_builder(self):
-        """Test DenyRule.build() method."""
+    def test_builder_defaults(self):
         deny_rule = DenyRule.build(
             providers=['/orgs/1/labels/1'],
             consumers=['ams'],
             ingress_services=[{'port': 443, 'proto': 6}],
-            name='DR-Block-HTTPS',
-            priority=100
         )
-        
-        assert deny_rule.name == 'DR-Block-HTTPS'
-        assert deny_rule.priority == 100
-        assert deny_rule.enabled == True
+        assert deny_rule.enabled is True
+        # A plain deny rule does not force override; server default is false.
+        assert deny_rule.override in (None, False)
         assert len(deny_rule.providers) == 1
-        assert len(deny_rule.consumers) == 1
-        assert len(deny_rule.ingress_services) == 1
 
-    def test_deny_rule_json_encoding(self):
-        """Test DenyRule JSON encoding."""
+    def test_builder_with_override(self):
         deny_rule = DenyRule.build(
             providers=['/orgs/1/labels/1'],
             consumers=['/orgs/1/labels/2'],
             ingress_services=[{'port': 22, 'proto': 6}],
-            name='DR-Test',
-            priority=75
+            override=True,
         )
-        
-        json_result = deny_rule.to_json()
-        
-        assert json_result['name'] == 'DR-Test'
-        assert json_result['priority'] == 75
-        assert json_result['enabled'] == True
-        assert 'providers' in json_result
-        assert 'consumers' in json_result
-        assert 'ingress_services' in json_result
-        # resolve_labels_as not required for deny rules
+        assert deny_rule.override is True
 
-    def test_deny_rule_decoding(self, deny_rules):
-        """Test DenyRule JSON decoding."""
-        rule_json = deny_rules[0]
-        rule = DenyRule.from_json(rule_json)
-        
-        assert rule.href == "/orgs/1/sec_policy/draft/deny_rules/1"
-        assert rule.name == "DR-Block-SSH-External"
-        assert rule.priority == 100
-        assert len(rule.ingress_services) == 1
-        assert rule.ingress_services[0].port == 22
+    def test_json_encoding_has_no_resolve_labels_as(self):
+        deny_rule = DenyRule.build(
+            providers=['/orgs/1/labels/1'],
+            consumers=['/orgs/1/labels/2'],
+            ingress_services=[{'port': 22, 'proto': 6}],
+        )
+        j = deny_rule.to_json()
+        assert 'resolve_labels_as' not in j
+        assert 'priority' not in j
+        assert 'providers' in j and 'consumers' in j and 'ingress_services' in j
+
+    def test_update_deny_rule(self, pce):
+        pce.deny_rules.update(MOCK_DENY_RULE_HREF, {'enabled': False})
+        updated = pce.deny_rules.get_by_reference(MOCK_DENY_RULE_HREF)
+        assert updated.enabled is False
 
 
 class TestOverrideDenyRule:
-    """Test cases for OverrideDenyRule API."""
+    """OverrideDenyRule is a deny rule with override defaulting True."""
 
-    def test_get_override_deny_rules(self, pce):
-        """Test fetching override deny rules."""
-        rules = pce.override_deny_rules.get()
-        assert len(rules) >= 2
-        assert all(isinstance(r, OverrideDenyRule) for r in rules)
-
-    def test_get_override_deny_rule_by_reference(self, pce):
-        """Test fetching a single override deny rule by href."""
-        rule = pce.override_deny_rules.get_by_reference(
-            "/orgs/1/sec_policy/draft/override_deny_rules/1"
-        )
-        assert rule.name == "ODR-Allow-Admin-SSH"
-        assert rule.enabled == True
-
-    def test_get_override_deny_rule_by_name(self, pce):
-        """Test fetching override deny rule by name."""
-        rule = pce.override_deny_rules.get_by_name("ODR-Allow-Admin-SSH")
-        assert rule is not None
-
-    def test_create_override_deny_rule(self, pce):
-        """Test creating an override deny rule."""
-        override_rule = OverrideDenyRule.build(
+    def test_builder_defaults_override_true(self):
+        rule = OverrideDenyRule.build(
             providers=['/orgs/1/labels/10'],
             consumers=['/orgs/1/labels/1'],
             ingress_services=[{'port': 22, 'proto': 6}],
-            name='ODR-Test-Override'
         )
-        created = pce.override_deny_rules.create(override_rule)
-        assert created.href is not None
-        assert 'override_deny_rules' in created.href
+        assert rule.override is True
 
-    def test_override_deny_rule_builder(self):
-        """Test OverrideDenyRule.build() method."""
-        override_rule = OverrideDenyRule.build(
-            providers=['/orgs/1/labels/1'],
-            consumers=['/orgs/1/labels/2'],
-            ingress_services=[{'port': 443, 'proto': 6}],
-            name='ODR-Emergency',
-            overrides=['/orgs/1/sec_policy/draft/deny_rules/1']
-        )
-        
-        assert override_rule.name == 'ODR-Emergency'
-        assert override_rule.enabled == True
-        assert len(override_rule.providers) == 1
-        assert len(override_rule.consumers) == 1
-
-    def test_override_deny_rule_json_encoding(self):
-        """Test OverrideDenyRule JSON encoding."""
-        override_rule = OverrideDenyRule.build(
-            providers=['/orgs/1/labels/1'],
-            consumers=['/orgs/1/labels/2'],
+    def test_override_targets_deny_endpoint(self, pce):
+        rule = OverrideDenyRule.build(
+            providers=['/orgs/1/labels/10'],
+            consumers=['/orgs/1/labels/1'],
             ingress_services=[{'port': 22, 'proto': 6}],
-            name='ODR-Test'
         )
-        
-        json_result = override_rule.to_json()
-        
-        assert json_result['name'] == 'ODR-Test'
-        assert json_result['enabled'] == True
-        assert 'providers' in json_result
-        assert 'consumers' in json_result
+        created = pce.override_deny_rules.create(rule, parent=MOCK_RULE_SET_HREF)
+        assert '/rule_sets/3/deny_rules' in created.href
 
-    def test_override_deny_rule_decoding(self, override_deny_rules):
-        """Test OverrideDenyRule JSON decoding."""
-        rule_json = override_deny_rules[0]
-        rule = OverrideDenyRule.from_json(rule_json)
-        
-        assert rule.href == "/orgs/1/sec_policy/draft/override_deny_rules/1"
-        assert rule.name == "ODR-Allow-Admin-SSH"
-        assert len(rule.overrides) == 1
-
-    def test_override_with_multiple_deny_rules(self, override_deny_rules):
-        """Test OverrideDenyRule with multiple overrides."""
-        rule_json = override_deny_rules[1]  # Has 2 overrides
-        rule = OverrideDenyRule.from_json(rule_json)
-        
-        assert len(rule.overrides) == 2
-        assert rule.enabled == False  # This one is disabled
-
-
-class TestRuleActions:
-    """Test rule action field behavior."""
-    
-    def test_rule_action_allow(self):
-        """Test Rule with allow action."""
-        from illumio.rules import Rule
-        rule = Rule.build(
-            providers=['/orgs/1/labels/1'],
-            consumers=['/orgs/1/labels/2'],
-            ingress_services=[{'port': 80, 'proto': 6}],
-            action='allow'
-        )
-        assert rule.action == 'allow'
-    
-    def test_rule_action_deny(self):
-        """Test Rule with deny action."""
-        from illumio.rules import Rule
-        rule = Rule.build(
-            providers=['/orgs/1/labels/1'],
-            consumers=['/orgs/1/labels/2'],
-            ingress_services=[{'port': 80, 'proto': 6}],
-            action='deny'
-        )
-        assert rule.action == 'deny'
-    
-    def test_rule_action_override_deny(self):
-        """Test Rule with override_deny action."""
-        from illumio.rules import Rule
-        rule = Rule.build(
-            providers=['/orgs/1/labels/1'],
-            consumers=['/orgs/1/labels/2'],
-            ingress_services=[{'port': 80, 'proto': 6}],
-            action='override_deny'
-        )
-        assert rule.action == 'override_deny'
-    
-    def test_rule_invalid_action_raises(self):
-        """Test that invalid action raises exception."""
-        from illumio.rules import Rule
-        from illumio.exceptions import IllumioException
-        
-        with pytest.raises(IllumioException):
-            Rule.build(
-                providers=['/orgs/1/labels/1'],
-                consumers=['/orgs/1/labels/2'],
-                ingress_services=[{'port': 80, 'proto': 6}],
-                action='invalid_action'
-            )
+    def test_get_override_deny_rule_by_reference(self, pce):
+        rule = pce.override_deny_rules.get_by_reference(MOCK_OVERRIDE_DENY_RULE_HREF)
+        assert rule.override is True
+        assert rule.enabled is True
 
 
 class TestDenyRulesInRuleSet:
-    """Test cases for DenyRule within RuleSet context."""
+    """Deny rules embedded within their parent RuleSet.
 
-    def test_ruleset_with_deny_rules(self, pce):
-        """Test fetching a ruleset with deny_rules field."""
+    A real ruleset exposes a single ``deny_rules`` array holding both ordinary
+    deny rules (``override=False``) and override-deny rules (``override=True``);
+    there is no separate ``override_deny_rules`` array.
+    """
+
+    def test_ruleset_deny_rules_array_holds_both_kinds(self, pce):
         ruleset = pce.rule_sets.get_by_reference(MOCK_RULE_SET_HREF)
         assert ruleset.name == "RS-WITH-DENY-RULES"
-        assert ruleset.deny_rules is not None
-        assert len(ruleset.deny_rules) == 1
-        assert isinstance(ruleset.deny_rules[0], DenyRule)
-        assert ruleset.deny_rules[0].name == "DR-Block-SSH-In-RuleSet"
-
-    def test_ruleset_with_override_deny_rules(self, pce):
-        """Test fetching a ruleset with override_deny_rules field."""
-        ruleset = pce.rule_sets.get_by_reference(MOCK_RULE_SET_HREF)
-        assert ruleset.override_deny_rules is not None
-        assert len(ruleset.override_deny_rules) == 1
-        assert isinstance(ruleset.override_deny_rules[0], OverrideDenyRule)
-        assert ruleset.override_deny_rules[0].name == "ODR-Allow-Admin-In-RuleSet"
-
-    def test_create_deny_rule_in_ruleset(self, pce):
-        """Test creating a deny rule within a ruleset."""
-        deny_rule = DenyRule.build(
-            providers=['/orgs/1/labels/1'],
-            consumers=['/orgs/1/labels/2'],
-            ingress_services=[{'port': 3389, 'proto': 6}],
-            name='DR-Block-RDP-In-RuleSet',
-            priority=50
-        )
-        created = pce.deny_rules.create(deny_rule, parent=MOCK_RULE_SET_HREF)
-        assert created.href is not None
-        # When created with a parent, the href should contain the ruleset path
-        assert 'deny_rules' in created.href
-
-    def test_create_override_deny_rule_in_ruleset(self, pce):
-        """Test creating an override deny rule within a ruleset."""
-        override_rule = OverrideDenyRule.build(
-            providers=['/orgs/1/labels/10'],
-            consumers=['/orgs/1/labels/2'],
-            ingress_services=[{'port': 22, 'proto': 6}],
-            name='ODR-Emergency-In-RuleSet'
-        )
-        created = pce.override_deny_rules.create(override_rule, parent=MOCK_RULE_SET_HREF)
-        assert created.href is not None
-        assert 'override_deny_rules' in created.href
-
-    def test_get_deny_rules_from_ruleset(self, pce):
-        """Test getting deny rules from a specific ruleset."""
-        deny_rules = pce.deny_rules.get(parent=MOCK_RULE_SET_HREF)
-        # Should only return deny rules from that ruleset
-        assert isinstance(deny_rules, list)
-
-    def test_get_override_deny_rules_from_ruleset(self, pce):
-        """Test getting override deny rules from a specific ruleset."""
-        override_rules = pce.override_deny_rules.get(parent=MOCK_RULE_SET_HREF)
-        assert isinstance(override_rules, list)
+        assert not hasattr(ruleset, 'override_deny_rules') or \
+            'override_deny_rules' not in {f.name for f in RuleSet.__dataclass_fields__.values()}
+        assert len(ruleset.deny_rules) == 2
+        assert all(isinstance(r, DenyRule) for r in ruleset.deny_rules)
+        overrides = sorted(r.override for r in ruleset.deny_rules)
+        assert overrides == [False, True]
 
     def test_ruleset_deny_rules_json_encoding(self, pce):
-        """Test that a ruleset with deny rules encodes correctly to JSON."""
         ruleset = pce.rule_sets.get_by_reference(MOCK_RULE_SET_HREF)
-        json_result = ruleset.to_json()
-        
-        assert 'deny_rules' in json_result
-        assert 'override_deny_rules' in json_result
-        assert len(json_result['deny_rules']) == 1
-        assert len(json_result['override_deny_rules']) == 1
-        
-        deny_rule_json = json_result['deny_rules'][0]
-        assert deny_rule_json['name'] == 'DR-Block-SSH-In-RuleSet'
-        assert deny_rule_json['priority'] == 100
-        assert 'ingress_services' in deny_rule_json
-
-    def test_update_deny_rule_in_ruleset(self, pce):
-        """Test updating a deny rule within a ruleset context."""
-        deny_rule_href = f"{MOCK_RULE_SET_HREF}/sec_deny_rules/1"
-        pce.deny_rules.update(deny_rule_href, {'enabled': False, 'priority': 200})
-        
-        updated = pce.deny_rules.get_by_reference(deny_rule_href)
-        assert updated.enabled == False
-        assert updated.priority == 200
-
-    def test_delete_deny_rule_from_ruleset(self, pce):
-        """Test deleting a deny rule from a ruleset."""
-        # First create a deny rule to delete
-        deny_rule = DenyRule.build(
-            providers=['/orgs/1/labels/1'],
-            consumers=['/orgs/1/labels/2'],
-            ingress_services=[{'port': 8080, 'proto': 6}],
-            name='DR-To-Delete',
-            priority=10
-        )
-        created = pce.deny_rules.create(deny_rule, parent=MOCK_RULE_SET_HREF)
-        
-        # Now delete it
-        pce.deny_rules.delete(created.href)
-        # No exception means success (DELETE returns 204)
+        j = ruleset.to_json()
+        assert 'override_deny_rules' not in j
+        for dr in j['deny_rules']:
+            assert 'priority' not in dr
+            assert 'overrides' not in dr
 
 
 class TestRuleSetModel:
-    """Test RuleSet model with deny rules fields."""
-    
+    def test_ruleset_has_no_override_deny_rules_field(self):
+        field_names = {f.name for f in RuleSet.__dataclass_fields__.values()}
+        assert 'deny_rules' in field_names
+        assert 'override_deny_rules' not in field_names
+
     def test_ruleset_empty_deny_rules(self):
-        """Test creating a RuleSet with empty deny_rules."""
-        ruleset = RuleSet(
-            name='RS-Empty-Deny',
-            deny_rules=[],
-            override_deny_rules=[]
-        )
+        ruleset = RuleSet(name='RS-Empty-Deny', deny_rules=[])
         assert ruleset.deny_rules == []
-        assert ruleset.override_deny_rules == []
-    
-    def test_ruleset_with_deny_rules_objects(self):
-        """Test creating a RuleSet with DenyRule objects."""
-        deny_rule = DenyRule.build(
-            providers=['/orgs/1/labels/1'],
-            consumers=['/orgs/1/labels/2'],
-            ingress_services=[{'port': 22, 'proto': 6}],
-            name='DR-Test',
-            priority=100
-        )
-        ruleset = RuleSet(
-            name='RS-With-Deny',
-            deny_rules=[deny_rule]
-        )
-        assert len(ruleset.deny_rules) == 1
-        assert ruleset.deny_rules[0].name == 'DR-Test'
-    
-    def test_ruleset_json_with_deny_rules(self):
-        """Test JSON encoding of RuleSet with deny rules."""
-        deny_rule = DenyRule.build(
-            providers=['/orgs/1/labels/1'],
-            consumers=['/orgs/1/labels/2'],
-            ingress_services=[{'port': 22, 'proto': 6}],
-            name='DR-Test',
-            priority=100
-        )
-        override_rule = OverrideDenyRule.build(
-            providers=['/orgs/1/labels/10'],
-            consumers=['/orgs/1/labels/1'],
-            ingress_services=[{'port': 22, 'proto': 6}],
-            name='ODR-Test'
-        )
-        ruleset = RuleSet(
-            name='RS-Full',
-            deny_rules=[deny_rule],
-            override_deny_rules=[override_rule]
-        )
-        
-        json_result = ruleset.to_json()
-        
-        assert json_result['name'] == 'RS-Full'
-        assert 'deny_rules' in json_result
-        assert 'override_deny_rules' in json_result
-        assert len(json_result['deny_rules']) == 1
-        assert len(json_result['override_deny_rules']) == 1
-
-
-# Integration test examples (commented out for reference)
-# These would be run against a real PCE with --integration flag
-#
-# class TestDenyRulesIntegration:
-#     """Integration tests for deny rules - requires real PCE connection."""
-#     
-#     @pytest.mark.integration
-#     def test_create_deny_rule_in_live_ruleset(self, pce, test_ruleset, test_ip_list, test_label):
-#         """Create a deny rule in a live ruleset."""
-#         deny_rule = DenyRule.build(
-#             providers=[test_ip_list.href],
-#             consumers=[test_label.href],
-#             ingress_services=[{'port': 22, 'proto': 'tcp'}],
-#             name='intg-test-deny-rule',
-#             priority=100
-#         )
-#         created = pce.deny_rules.create(deny_rule, parent=test_ruleset)
-#         assert created.href is not None
-#         assert 'deny_rules' in created.href
-#         
-#         # Cleanup
-#         pce.deny_rules.delete(created.href)
-#     
-#     @pytest.mark.integration
-#     def test_override_deny_rule_in_live_ruleset(self, pce, test_ruleset, test_label):
-#         """Create an override deny rule in a live ruleset."""
-#         # First create a deny rule to override
-#         deny_rule = DenyRule.build(
-#             providers=['/orgs/1/sec_policy/draft/ip_lists/1'],
-#             consumers=[test_label.href],
-#             ingress_services=[{'port': 22, 'proto': 'tcp'}],
-#             name='intg-test-deny-to-override',
-#             priority=100
-#         )
-#         created_deny = pce.deny_rules.create(deny_rule, parent=test_ruleset)
-#         
-#         # Now create override
-#         override_rule = OverrideDenyRule.build(
-#             providers=[test_label.href],
-#             consumers=[test_label.href],
-#             ingress_services=[{'port': 22, 'proto': 'tcp'}],
-#             name='intg-test-override',
-#             overrides=[created_deny.href]
-#         )
-#         created_override = pce.override_deny_rules.create(override_rule, parent=test_ruleset)
-#         assert created_override.href is not None
-#         
-#         # Cleanup
-#         pce.override_deny_rules.delete(created_override.href)
-#         pce.deny_rules.delete(created_deny.href)

@@ -1,10 +1,10 @@
 [
     {
-        "href": "/orgs/1/sec_policy/draft/deny_rules/1",
-        "name": "DR-Block-SSH-External",
+        "href": "/orgs/1/sec_policy/draft/rule_sets/3/deny_rules/1",
         "description": "Block SSH from external sources",
         "enabled": true,
-        "priority": 100,
+        "override": false,
+        "network_type": "brn",
         "providers": [
             {
                 "ip_list": {
@@ -25,10 +25,6 @@
                 "proto": 6
             }
         ],
-        "resolve_labels_as": {
-            "providers": ["workloads"],
-            "consumers": ["workloads"]
-        },
         "created_at": "2024-01-15T10:30:00.000Z",
         "updated_at": "2024-01-15T10:30:00.000Z",
         "created_by": {
@@ -39,11 +35,12 @@
         }
     },
     {
-        "href": "/orgs/1/sec_policy/draft/deny_rules/2",
-        "name": "DR-Block-RDP",
-        "description": "Block RDP access",
+        "href": "/orgs/1/sec_policy/draft/rule_sets/3/deny_rules/2",
+        "description": "Block RDP with egress and exclusions",
         "enabled": true,
-        "priority": 90,
+        "override": false,
+        "unscoped_consumers": true,
+        "all_ips_except_for_in_consumers": true,
         "providers": [
             {
                 "actors": "ams"
@@ -66,10 +63,11 @@
                 "proto": 17
             }
         ],
-        "resolve_labels_as": {
-            "providers": ["workloads"],
-            "consumers": ["workloads"]
-        },
+        "egress_services": [
+            {
+                "href": "/orgs/1/sec_policy/draft/services/3"
+            }
+        ],
         "created_at": "2024-02-01T14:00:00.000Z",
         "updated_at": "2024-02-01T14:00:00.000Z",
         "created_by": {
@@ -80,11 +78,9 @@
         }
     },
     {
-        "href": "/orgs/1/sec_policy/draft/rule_sets/3/sec_deny_rules/1",
-        "name": "DR-Block-SSH-In-RuleSet",
+        "href": "/orgs/1/sec_policy/draft/rule_sets/3/deny_rules/3",
         "description": "Deny rule within ruleset context",
         "enabled": true,
-        "priority": 100,
         "providers": [
             {
                 "ip_list": {
@@ -105,10 +101,6 @@
                 "proto": 6
             }
         ],
-        "resolve_labels_as": {
-            "providers": ["workloads"],
-            "consumers": ["workloads"]
-        },
         "created_at": "2024-01-15T10:30:00.000Z",
         "updated_at": "2024-01-15T10:30:00.000Z",
         "created_by": {

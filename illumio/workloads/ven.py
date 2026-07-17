@@ -208,6 +208,10 @@ class VEN(MutableObject):
     unpair_allowed: bool = None
     conditions: List[VENCondition] = None
     ven_type: str = None
+    authentication_recovery: bool = None
+    golden_image: bool = None
+    upgrade_target_version: str = None
+    upgrade_expires_at: str = None
 
     def _validate(self):
         if self.ven_type and self.ven_type not in VENType:
