@@ -1,13 +1,17 @@
 name: Release
 
-# Publishes to PyPI whenever a version tag (e.g. v2.0.0) is pushed.
+# Builds on every version tag (vX.Y.Z...) and publishes:
+#   - pre-release tags (e.g. v2.0.0rc1, v2.0.0a1, v2.0.0.dev1) -> TestPyPI (dry run)
+#   - final tags (e.g. v2.0.0)                                 -> PyPI
 # Version is derived from the tag by setuptools_scm.
 #
-# Publishing uses PyPI Trusted Publishing (OIDC) — no API token secret needed.
-# One-time setup on PyPI: add a trusted publisher for project "illumio-py-open"
-#   Owner: alexgoller  |  Repo: illumio-py  |  Workflow: release.yml  |  Environment: pypi
-# (Token alternative: set a PYPI_API_TOKEN secret and pass `password:` to the
-#  publish action instead of using id-token.)
+# Publishing uses Trusted Publishing (OIDC) — no API token secret needed.
+# One-time setup, on BOTH pypi.org and test.pypi.org, add a (pending) trusted publisher:
+#   Project: illumio-py-open | Owner: alexgoller | Repo: illumio-py
+#   Workflow: release.yml     | Environment: pypi (on PyPI) / testpypi (on TestPyPI)
+# Also create matching GitHub environments named "pypi" and "testpypi".
+# (Token alternative: set PYPI_API_TOKEN / TEST_PYPI_API_TOKEN secrets and pass
+#  `password:` to the publish action instead of using id-token.)
 
 on:
   push:
@@ -52,15 +56,54 @@ jobs:
           name: dist
           path: dist/
 
-  publish:
-    name: Publish to PyPI
+  classify:
+    name: Classify release
     needs: build
+    runs-on: ubuntu-latest
+    outputs:
+      prerelease: ${{ steps.check.outputs.prerelease }}
+    steps:
+      - id: check
+        run: |
+          # Final release iff the tag is exactly vN.N.N (no rc/a/b/dev suffix).
+          if [[ "${GITHUB_REF_NAME}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+            echo "Final release: ${GITHUB_REF_NAME} -> PyPI"
+          else
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+            echo "Pre-release: ${GITHUB_REF_NAME} -> TestPyPI (dry run)"
+          fi
+
+  publish-testpypi:
+    name: Publish to TestPyPI (dry run)
+    needs: [build, classify]
+    if: needs.classify.outputs.prerelease == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/illumio-py-open
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: [build, classify]
+    if: needs.classify.outputs.prerelease == 'false'
     runs-on: ubuntu-latest
     environment:
       name: pypi
       url: https://pypi.org/p/illumio-py-open
     permissions:
-      id-token: write   # OIDC token for PyPI trusted publishing
+      id-token: write
     steps:
       - uses: actions/download-artifact@v4
         with:

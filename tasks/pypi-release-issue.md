@@ -26,19 +26,25 @@ Proposed: **`illumio-py-open`** (import name stays `illumio`).
 
 ## Release process (already implemented)
 
-1. Bump = create a git tag `vX.Y.Z` (version is derived from the tag by `setuptools_scm`).
-2. Pushing the tag triggers `.github/workflows/release.yml`: run tests → build sdist+wheel →
-   `twine check` → publish to PyPI via **Trusted Publishing (OIDC)** (no token secret).
+Tag → `.github/workflows/release.yml`: run tests → build sdist+wheel → `twine check` →
+publish via **Trusted Publishing (OIDC)**, routed by tag type:
+- **pre-release** tag (e.g. `v2.0.0rc1`, `v2.0.0a1`, `v2.0.0.dev1`) → **TestPyPI** (dry run)
+- **final** tag (e.g. `v2.0.0`) → **PyPI**
+
+Version is derived from the tag by `setuptools_scm`.
 
 ## Remaining one-time setup (before first publish)
 
-- [ ] Confirm the final distribution name (spelling + trademark).
-- [ ] Create the PyPI project / reserve the name (a TestPyPI dry run first is recommended).
-- [ ] Configure the PyPI **Trusted Publisher**: owner `alexgoller`, repo `illumio-py`,
-      workflow `release.yml`, environment `pypi`. (Token alternative: set a `PYPI_API_TOKEN`
-      secret and switch the publish step to use it.)
-- [ ] Create a GitHub `pypi` environment (optionally with required reviewers).
-- [ ] Decide the first version tag (e.g. `v2.0.0` to signal the fork/major change).
+- [ ] Confirm the final distribution name (spelling + trademark). `illumio-py-open` is
+      available on PyPI as of this writing.
+- [ ] **TestPyPI** account + **Trusted Publisher**: project `illumio-py-open`, owner
+      `alexgoller`, repo `illumio-py`, workflow `release.yml`, environment `testpypi`.
+- [ ] **PyPI** account + **Trusted Publisher**: same, environment `pypi`.
+      (Token alternative: `TEST_PYPI_API_TOKEN` / `PYPI_API_TOKEN` secrets + `password:`.)
+- [ ] Create GitHub environments `testpypi` and `pypi` (optionally required reviewers on `pypi`).
+- [ ] Dry run: push `v2.0.0rc1` → verify it lands on TestPyPI and
+      `pip install -i https://test.pypi.org/simple/ illumio-py-open` works.
+- [ ] Then push the final `v2.0.0` (signals the fork/major change).
 
 ## Done in this repo
 
