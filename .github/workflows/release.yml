@@ -1,17 +1,17 @@
 name: Release
 
-# Builds on every version tag (vX.Y.Z...) and publishes:
-#   - pre-release tags (e.g. v2.0.0rc1, v2.0.0a1, v2.0.0.dev1) -> TestPyPI (dry run)
-#   - final tags (e.g. v2.0.0)                                 -> PyPI
+# Builds on every version tag (vX.Y.Z...):
+#   - final tags (e.g. v1.2.0)                                 -> published to PyPI
+#   - pre-release tags (e.g. v1.2.0rc1, v1.2.0a1, v1.2.0.dev1) -> build only, not published
 # Version is derived from the tag by setuptools_scm.
 #
 # Publishing uses Trusted Publishing (OIDC) — no API token secret needed.
-# One-time setup, on BOTH pypi.org and test.pypi.org, add a (pending) trusted publisher:
+# One-time setup on pypi.org, add a (pending) trusted publisher:
 #   Project: illumio-py-open | Owner: alexgoller | Repo: illumio-py
-#   Workflow: release.yml     | Environment: pypi (on PyPI) / testpypi (on TestPyPI)
-# Also create matching GitHub environments named "pypi" and "testpypi".
-# (Token alternative: set PYPI_API_TOKEN / TEST_PYPI_API_TOKEN secrets and pass
-#  `password:` to the publish action instead of using id-token.)
+#   Workflow: release.yml     | Environment: pypi
+# Also create a matching GitHub environment named "pypi".
+# (Token alternative: set a PYPI_API_TOKEN secret and pass `password:` to the
+#  publish action instead of using id-token.)
 
 on:
   push:
@@ -71,28 +71,8 @@ jobs:
             echo "Final release: ${GITHUB_REF_NAME} -> PyPI"
           else
             echo "prerelease=true" >> "$GITHUB_OUTPUT"
-            echo "Pre-release: ${GITHUB_REF_NAME} -> TestPyPI (dry run)"
+            echo "Pre-release: ${GITHUB_REF_NAME} -> build only (not published)"
           fi
-
-  publish-testpypi:
-    name: Publish to TestPyPI (dry run)
-    needs: [build, classify]
-    if: needs.classify.outputs.prerelease == 'true'
-    runs-on: ubuntu-latest
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/illumio-py-open
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist/
-      - name: Publish to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
 
   publish-pypi:
     name: Publish to PyPI
