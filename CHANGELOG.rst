@@ -1,6 +1,24 @@
 Changelog
 =========
 
+Version 1.2.2 (2026-07-18)
+--------------------------
+
+.. rubric:: DOCUMENTATION
+
+* Restructured the documentation around the `Diátaxis <https://diataxis.fr/>`_
+  framework — an ordered getting-started tutorial (install → connect →
+  first-policy), nine task-focused guides, four concept pages (architecture,
+  object model, policy versioning, org scoping), a per-subpackage API reference,
+  and project pages (migrating-from-illumio, compatibility). Published to GitHub
+  Pages; builds with zero Sphinx warnings.
+* Removed the Illumio logo from the docs (this is a community fork, not
+  affiliated with Illumio).
+
+.. rubric:: IMPROVEMENTS
+
+* Cleaned up the ``pce_api`` decorator docstring so the reference builds cleanly.
+
 Version 1.2.1 (2026-07-17)
 --------------------------
 
