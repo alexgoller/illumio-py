@@ -69,8 +69,10 @@ class LabelResolutionBlock(JsonObject):
 class Rule(BaseRule, MutableObject):
     """Represents a security rule in the PCE.
 
-    Each security rule defines one or more services on which traffic will be
-    allowed from the defined providers to the defined consumers.
+    Each security rule defines one or more services on which the defined
+    consumers are allowed to reach the defined providers. In Illumio, providers
+    provide a service (the destination) and consumers consume it (the source
+    that initiates the connection).
 
     Providers and consumers can be defined using static (workload HREF) or
     dynamic (label, IP list) references. By default, providers and consumers
@@ -170,9 +172,10 @@ class Rule(BaseRule, MutableObject):
 class _DenyRuleBase(BaseRule, MutableObject):
     """Shared shape for deny rules, modelled on the ``deny_rules_get`` schema.
 
-    A deny rule blocks traffic from its providers to its consumers on the given
-    services. The ``override`` flag sets its precedence in the policy evaluation
-    order override-deny > allow > deny:
+    A deny rule blocks the defined consumers (the sources that initiate the
+    connection) from reaching the defined providers (the destinations) on the
+    given services. The ``override`` flag sets its precedence in the policy
+    evaluation order override-deny > allow > deny:
 
     - ``override=False`` (default): an ordinary deny rule, superseded by allow
       and override-deny rules.
@@ -202,12 +205,12 @@ class _DenyRuleBase(BaseRule, MutableObject):
 class DenyRule(_DenyRuleBase):
     """Represents a deny rule in the PCE.
 
-    Deny rules explicitly block traffic from the defined providers to the
-    defined consumers on the specified services. In the policy evaluation
-    order (override-deny > allow > deny), an ordinary deny rule is applied last
-    and can be overridden by an allow or override-deny rule. Set
-    ``override=True`` (or use :class:`OverrideDenyRule`) for an override-deny
-    rule that takes precedence over allow rules.
+    Deny rules explicitly block the defined consumers (sources) from reaching
+    the defined providers (destinations) on the specified services. In the
+    policy evaluation order (override-deny > allow > deny), an ordinary deny
+    rule is applied last and can be overridden by an allow or override-deny
+    rule. Set ``override=True`` (or use :class:`OverrideDenyRule`) for an
+    override-deny rule that takes precedence over allow rules.
 
     Deny rules live nested under a ruleset and are created, fetched, updated,
     and deleted with the ruleset passed as ``parent``.
@@ -219,9 +222,10 @@ class DenyRule(_DenyRuleBase):
         >>> ruleset = pce.rule_sets.get_by_name('RS-APP')
         >>> external_ip_list = pce.ip_lists.get(name='External-IPs')[0]
         >>> internal_label = pce.labels.get(key='role', value='internal')[0]
+        >>> # block external sources from reaching internal workloads over SSH/RDP
         >>> deny_rule = illumio.DenyRule.build(
-        ...     providers=[external_ip_list],
-        ...     consumers=[internal_label],
+        ...     providers=[internal_label],
+        ...     consumers=[external_ip_list],
         ...     ingress_services=[
         ...         {'port': 22, 'proto': 'tcp'},
         ...         {'port': 3389, 'proto': 'tcp'}
@@ -232,31 +236,35 @@ class DenyRule(_DenyRuleBase):
 
 
 @dataclass
-@pce_api('override_deny_rules', endpoint='/deny_rules')
 class OverrideDenyRule(_DenyRuleBase):
-    """Convenience for an override-deny rule (a deny rule with ``override=True``).
+    """Convenience builder for an override-deny rule (a deny rule with
+    ``override=True``).
 
     Override-deny rules block traffic and have the highest precedence in the
     policy evaluation order (override-deny > allow > deny): they cannot be
-    overridden by allow rules. They are the same object as :class:`DenyRule`
-    distinguished by the ``override`` flag, and use the same ``/deny_rules``
-    nested endpoint; :meth:`build` simply defaults ``override=True``.
+    overridden by allow rules. They are the *same object* as a
+    :class:`DenyRule` distinguished only by the ``override`` flag, and live at
+    the same ``/deny_rules`` nested endpoint — so they are created, fetched,
+    updated, and deleted through ``pce.deny_rules`` (there is no separate
+    ``override_deny_rules`` collection). This class simply defaults
+    ``override=True`` in :meth:`build`.
 
     Usage:
         >>> import illumio
         >>> pce = illumio.PolicyComputeEngine('pce.company.com', port=443, org_id=1)
         >>> pce.set_credentials('api_key', 'api_secret')
         >>> ruleset = pce.rule_sets.get_by_name('RS-APP')
-        >>> admin_label = pce.labels.get(key='role', value='admin')[0]
+        >>> contractor_label = pce.labels.get(key='role', value='contractor')[0]
         >>> internal_label = pce.labels.get(key='role', value='internal')[0]
+        >>> # unconditionally block contractors from reaching internal workloads
         >>> override_rule = illumio.OverrideDenyRule.build(
-        ...     providers=[admin_label],
-        ...     consumers=[internal_label],
+        ...     providers=[internal_label],
+        ...     consumers=[contractor_label],
         ...     ingress_services=[
         ...         {'port': 22, 'proto': 'tcp'}
         ...     ]
         ... )
-        >>> override_rule = pce.override_deny_rules.create(override_rule, parent=ruleset)
+        >>> override_rule = pce.deny_rules.create(override_rule, parent=ruleset)
     """
 
     @classmethod

@@ -98,7 +98,7 @@ All registered APIs get automatic CRUD via `pce.<api_name>.get()`, `.create()`, 
 |---|---|---|
 | `Rule` | `rules` | endpoint='/sec_rules' |
 | `DenyRule` | `deny_rules` | endpoint='/deny_rules', nested under a ruleset via `parent=`. Single deny-rule object; `override=True` makes it an override-deny rule (precedence: override-deny > allow > deny) |
-| `OverrideDenyRule` | `override_deny_rules` | Convenience for `DenyRule` with `override=True`; same `/deny_rules` endpoint |
+| `OverrideDenyRule` | _(not registered)_ | Builder convenience only (`build()` defaults `override=True`); created via `pce.deny_rules.create(OverrideDenyRule.build(...), parent=ruleset)`. No separate `pce.override_deny_rules` collection |
 
 ### Workloads & VENs
 

@@ -16,12 +16,21 @@ keeps working unchanged:
 
 .. code-block:: sh
 
-    pip uninstall illumio        # the orphaned upstream distribution (optional)
+    pip uninstall illumio        # REQUIRED — see the warning below
     pip install illumio-py-open
 
 .. code-block:: python
 
     from illumio import PolicyComputeEngine   # unchanged
+
+.. warning::
+
+    ``illumio-py-open`` installs the **same** ``illumio`` import package as the
+    upstream ``illumio`` distribution. The two cannot be installed side by side:
+    which files win is install-order dependent, and uninstalling one can remove
+    or leave stale shared modules. **Uninstall the upstream** ``illumio``
+    **distribution before installing** ``illumio-py-open``, and do not list both
+    in the same requirements set.
 
 Behavioral changes to be aware of
 ---------------------------------
@@ -36,10 +45,12 @@ The deny-rule model was corrected to match the real PCE API (see
 :ref:`Deny and override-deny rules <denyrules>`):
 
 - There is a single :class:`DenyRule <illumio.rules.DenyRule>` object with an
-  ``override`` flag (``override=True`` is an override-deny rule). Both
-  :class:`DenyRule <illumio.rules.DenyRule>` and
-  :class:`OverrideDenyRule <illumio.rules.OverrideDenyRule>` post to the same
-  nested ``/deny_rules`` endpoint via ``parent=ruleset``.
+  ``override`` flag (``override=True`` is an override-deny rule), managed through
+  ``pce.deny_rules``. :class:`OverrideDenyRule <illumio.rules.OverrideDenyRule>`
+  is now only a convenience builder (its ``build`` defaults ``override=True``);
+  create it via ``pce.deny_rules.create(OverrideDenyRule.build(...), parent=ruleset)``.
+  There is no ``pce.override_deny_rules`` collection — a rule set exposes a single
+  ``deny_rules`` array holding both kinds, distinguished by ``override``.
 - Removed fields that never existed in the API: ``DenyRule.priority``,
   ``OverrideDenyRule.overrides``, and the ``Rule.action`` / ``RuleAction``
   machinery.

@@ -689,7 +689,8 @@ the same nested ``deny_rules`` endpoint.
         consumers=[any_ip_list.href],
         ingress_services=[{'port': 3389, 'proto': 'tcp'}]
     )
-    override_rdp = pce.override_deny_rules.create(override_rdp, parent=rule_set)
+    # override-deny rules are created through pce.deny_rules (no separate collection)
+    override_rdp = pce.deny_rules.create(override_rdp, parent=rule_set)
 
 A rule set exposes a single ``deny_rules`` collection that holds both ordinary
 and override-deny rules; the ``override`` attribute distinguishes them:

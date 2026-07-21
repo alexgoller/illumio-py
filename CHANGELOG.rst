@@ -1,6 +1,38 @@
 Changelog
 =========
 
+Version 1.3.0 (2026-07-21)
+--------------------------
+
+Fixes from an adversarial code review.
+
+.. rubric:: BUG FIXES
+
+* ``LDAPConfig`` now serializes the bind password as ``bind_password`` (the field
+  the PCE create/update schema expects); the old ``password`` field is kept as a
+  deprecated alias. LDAP create/update previously sent an unrecognized field.
+* Corrected the traffic direction in the allow/deny rule docstrings and examples:
+  consumers are the sources that initiate connections to providers (destinations).
+  The prior deny-rule example had providers and consumers reversed.
+* The built **wheel** now ships the ``NOTICE`` file alongside ``LICENSE``
+  (``license_files``), satisfying the Apache-2.0 attribution requirement for the
+  distributed artifact.
+
+.. rubric:: BREAKING CHANGES
+
+* Removed the ``pce.override_deny_rules`` collection. Override-deny rules are the
+  same object as deny rules (distinguished by ``override``) and share the
+  ``/deny_rules`` endpoint, so a separate collection returned a mix of ordinary
+  and override-deny rules. :class:`OverrideDenyRule <illumio.rules.OverrideDenyRule>`
+  remains as a builder convenience; create override-deny rules with
+  ``pce.deny_rules.create(OverrideDenyRule.build(...), parent=ruleset)``.
+
+.. rubric:: DOCUMENTATION
+
+* The migration guide now requires uninstalling the upstream ``illumio``
+  distribution before installing ``illumio-py-open`` (they share the ``illumio``
+  import package and cannot be installed side by side).
+
 Version 1.2.2 (2026-07-18)
 --------------------------
 

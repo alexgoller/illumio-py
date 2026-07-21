@@ -177,17 +177,26 @@ class TestOverrideDenyRule:
         )
         assert rule.override is True
 
-    def test_override_targets_deny_endpoint(self, pce):
+    def test_override_created_via_deny_rules_endpoint(self, pce):
+        # override-deny rules are created through pce.deny_rules (there is no
+        # separate override_deny_rules collection)
         rule = OverrideDenyRule.build(
             providers=['/orgs/1/labels/10'],
             consumers=['/orgs/1/labels/1'],
             ingress_services=[{'port': 22, 'proto': 6}],
         )
-        created = pce.override_deny_rules.create(rule, parent=MOCK_RULE_SET_HREF)
+        created = pce.deny_rules.create(rule, parent=MOCK_RULE_SET_HREF)
         assert '/rule_sets/3/deny_rules' in created.href
 
+    def test_no_override_deny_rules_api_registered(self, pce):
+        # OverrideDenyRule is a builder convenience only, not a registered API;
+        # accessing pce.override_deny_rules must fail rather than return a mixed
+        # collection of ordinary and override-deny rules.
+        with pytest.raises(Exception):
+            pce.override_deny_rules
+
     def test_get_override_deny_rule_by_reference(self, pce):
-        rule = pce.override_deny_rules.get_by_reference(MOCK_OVERRIDE_DENY_RULE_HREF)
+        rule = pce.deny_rules.get_by_reference(MOCK_OVERRIDE_DENY_RULE_HREF)
         assert rule.override is True
         assert rule.enabled is True
 

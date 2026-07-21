@@ -31,17 +31,22 @@ class LDAPConfig(MutableObject):
     """Represents an LDAP configuration in the PCE.
 
     Field names follow the current PCE API. The ``base_dn``, ``user_dn``,
-    ``request_timeout``, ``tls_enabled``, ``authentication_type``, and
-    ``bind_type`` fields are retained as deprecated aliases for backwards
+    ``password``, ``request_timeout``, ``tls_enabled``, ``authentication_type``,
+    and ``bind_type`` fields are retained as deprecated aliases for backwards
     compatibility; prefer ``user_base_distinguished_name``,
-    ``bind_distinguished_name``, ``request_timeout_seconds``,
+    ``bind_distinguished_name``, ``bind_password``, ``request_timeout_seconds``,
     ``insecure_disable_tls_certificate_verification``, and
     ``authentication_method``.
+
+    Note that ``bind_password`` is write-only: the PCE accepts it on create and
+    update but never returns it; ``is_bind_password_set`` indicates whether one
+    is configured.
     """
     address: str = None
     port: int = None
     authentication_method: str = None
     bind_distinguished_name: str = None
+    bind_password: str = None  # write-only; not returned on GET
     user_base_distinguished_name: str = None
     user_base_filter: str = None
     user_distinguished_name_pattern: str = None
@@ -53,10 +58,10 @@ class LDAPConfig(MutableObject):
     insecure_disable_tls_certificate_verification: bool = None
     is_bind_password_set: bool = None
     pce_fqdn: str = None
-    password: str = None  # write-only; not returned on GET
     # deprecated aliases (pre-1.2.0 field names)
     base_dn: str = None
     user_dn: str = None
+    password: str = None
     tls_enabled: bool = None
     request_timeout: int = None
     authentication_type: str = None

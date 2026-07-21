@@ -86,7 +86,8 @@ def create(pce):
         consumers=[any_ip.href],
         ingress_services=[{"port": 3389, "proto": "tcp"}],
     )
-    override = pce.override_deny_rules.create(override, parent=ruleset)
+    # override-deny rules are created through pce.deny_rules (no separate collection)
+    override = pce.deny_rules.create(override, parent=ruleset)
     print("Created override-deny rule override={!s:<5} {}".format(override.override, override.href))
 
     print("\nDeny rules now in the ruleset (fetched back from the PCE):")
