@@ -36,6 +36,12 @@ The main entrypoint for the client is the `PolicyComputeEngine` class:
 
 For more information on the Illumio APIs, see the [REST API guide](https://docs.illumio.com/core/21.5/Content/LandingPages/Guides/rest-api.htm) and the [API reference](https://docs.illumio.com/core/21.5/API-Reference/index.html) for your version of Illumio Core.  
 
+## Examples
+
+Runnable example scripts covering common tasks (labels, workloads, allow/deny
+rules, provisioning, traffic analysis, VENs, bulk operations, settings, pairing)
+live in [`examples/`](examples/) — see [`examples/README.md`](examples/README.md).
+
 ## [Documentation](https://alexgoller.github.io/illumio-py/)
 
 API documentation, code examples, and usage guides are published to
