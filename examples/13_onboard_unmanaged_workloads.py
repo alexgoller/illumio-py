@@ -39,35 +39,50 @@ INVENTORY = [
 ]
 
 
-def build_label_map(pce):
-    """Fetch every label once and index it by (key, value). One request instead
-    of one per label lookup. For very large orgs, ``pce.labels.get_async()`` runs
-    it as a single PCE job."""
+def build_label_caches(pce):
+    """Fetch every label once and build two caches for O(1) lookups both ways:
+
+    - ``by_href``: ``{href: Label}``          — href -> key/value (label.key, label.value)
+    - ``by_kv``:   ``{(key, value): Label}``   — (key, value) -> href (label.href)
+
+    One request instead of one per label lookup. For very large orgs,
+    ``pce.labels.get_async()`` runs it as a single PCE job.
+    """
     all_labels = pce.labels.get(params={"max_results": 100000})
-    return {(label.key, label.value): label for label in all_labels}
+    by_href = {label.href: label for label in all_labels}
+    by_kv = {(label.key, label.value): label for label in all_labels}
+    return by_href, by_kv
 
 
-def get_or_create_label(pce, label_map, key, value):
-    """Resolve a label from the in-memory map, creating it only if missing."""
-    label = label_map.get((key, value))
+def get_or_create_label(pce, by_href, by_kv, key, value):
+    """Resolve a label from the (key, value) cache, creating it only if missing.
+    Keeps both caches current so later lookups stay accurate."""
+    label = by_kv.get((key, value))
     if label is None:
         label = pce.labels.create(Label(key=key, value=value))
-        label_map[(key, value)] = label   # keep the map current for the rest of the run
+        by_kv[(key, value)] = label
+        by_href[label.href] = label
     return label
 
 
 def main():
     pce = connect()
 
-    # 1) Prefetch labels once.
-    label_map = build_label_map(pce)
-    print("Prefetched {} existing labels.".format(len(label_map)))
+    # 1) Prefetch labels once into two caches (href<->key/value).
+    by_href, by_kv = build_label_caches(pce)
+    print("Prefetched {} existing labels.".format(len(by_kv)))
 
-    # 2) Build the workload objects, resolving labels from the map.
+    # Example lookups both directions:
+    #   (key, value) -> href :  by_kv[('role', 'R-Web')].href
+    #   href -> value        :  by_href['/orgs/1/labels/1'].value
+
+    # 2) Build the workload objects, resolving labels from the caches. Note we
+    #    attach full Label objects directly to Workload(labels=...); the client
+    #    flattens each Reference to {"href": ...} when serializing.
     workloads = []
     for item in INVENTORY:
         label_refs = [
-            get_or_create_label(pce, label_map, key, value)
+            get_or_create_label(pce, by_href, by_kv, key, value)
             for key, value in item["labels"].items()
         ]
         workloads.append(Workload(
