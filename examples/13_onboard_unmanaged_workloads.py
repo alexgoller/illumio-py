@@ -17,8 +17,10 @@ The efficient, rate-limit-safe pattern is:
 Doing a ``GET /labels?key=..&value=..`` for every label of every workload is what
 triggers HTTP 429 rate-limit errors at scale — this avoids it entirely.
 
+It then shows how to re-label a single existing workload by href.
+
 WRITES: creates labels (only missing ones) and a batch of unmanaged workloads,
-then cleans up the workloads it created.
+updates one workload's labels, then cleans up the workloads it created.
 """
 from illumio import Label, Workload
 
@@ -102,6 +104,21 @@ def main():
         print("  ", href)
     for err in errors:
         print("  ERROR:", err.get("errors"))
+
+    # 4) Update a single existing workload's labels.
+    #    PUT replaces the whole label set, so send the complete desired labels.
+    #    You only need the workload's href — no need to fetch the workload first,
+    #    and no per-label GETs (labels come from the caches above). If you only
+    #    had hrefs you could pass Reference(href=h) instead of the Label objects.
+    if created:
+        target_href = created[0]
+        desired = {"role": "R-LoadBalancer", "app": "A-Shop", "env": "E-Staging", "loc": "L-AWS"}
+        new_labels = [
+            get_or_create_label(pce, by_href, by_kv, key, value)
+            for key, value in desired.items()
+        ]
+        pce.workloads.update(target_href, Workload(labels=new_labels))
+        print("Re-labelled {} (env -> Staging).".format(target_href))
 
     # Clean up the workloads this example created (leaves labels in place).
     if created:
