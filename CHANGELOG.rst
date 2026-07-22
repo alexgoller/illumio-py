@@ -1,6 +1,17 @@
 Changelog
 =========
 
+Version 1.3.1 (2026-07-22)
+--------------------------
+
+.. rubric:: DOCUMENTATION
+
+* Added a runnable ``examples/`` directory (shipped in the source distribution)
+  with twelve standalone scripts covering connect, labels and label groups, IP
+  lists and services, workloads and enforcement, allow rules, deny/override-deny
+  rules, traffic analysis, provisioning, VEN inspection, bulk operations,
+  settings and reporting, and pairing profiles.
+
 Version 1.3.0 (2026-07-21)
 --------------------------
 
