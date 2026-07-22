@@ -1,6 +1,17 @@
 Changelog
 =========
 
+Version 1.3.3 (2026-07-22)
+--------------------------
+
+.. rubric:: DOCUMENTATION
+
+* Added ``examples/13_onboard_unmanaged_workloads.py`` (shipped in the source
+  distribution): the common "sync" use case — bulk-onboarding unmanaged workloads
+  with labels the rate-limit-safe way (prefetch the label map once, get-or-create
+  labels from it, then ``bulk_create`` the batch), avoiding the per-label ``GET``
+  loop that triggers HTTP 429 errors at scale. Cross-linked to the retries guide.
+
 Version 1.3.2 (2026-07-22)
 --------------------------
 
