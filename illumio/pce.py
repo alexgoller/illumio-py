@@ -80,8 +80,15 @@ class PolicyComputeEngine:
         port (str, optional): PCE http(s) port. Defaults to '443'.
         version (str, optional): The PCE API version to use. Defaults to 'v2'.
         org_id (str, optional): The PCE organization ID. Defaults to '1'.
-        retry_count (int, optional): Number of times to retry on failure.
-            Defaults to 5.
+        retry_count (int, optional): total number of retries for the session's
+            retry adapter (``Retry(total=retry_count)``). Defaults to 5. Retries
+            use ``backoff_factor=2`` and cover HTTP 429/500/502/503/504,
+            honoring the PCE's ``Retry-After`` header. ``backoff_factor`` and the
+            status list are not otherwise configurable here; to change them,
+            mount your own adapter on ``self._session``. On sustained rate
+            limiting (HTTP 429) the retries are eventually exhausted and an
+            ``IllumioApiException`` is raised — reduce the request rate rather
+            than only increasing this value.
         request_timeout (int, optional): HTTP request timeout in seconds.
             Defaults to 30.
 

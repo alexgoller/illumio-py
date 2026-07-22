@@ -54,3 +54,86 @@ Verify using a local client-side cert pair::
 
     >>> pce.labels.get(verify=True, cert='/path/to/keypair.pem')
     >>> pce.labels.get(verify=True, cert=('/path/to/client.crt', '/path/to/client.key'))
+
+.. _guide-retries:
+
+Retries and rate limiting (HTTP 429)
+------------------------------------
+
+The PCE enforces API rate limits. When you exceed them it responds with
+**HTTP 429 (Too Many Requests)**. The client retries automatically, but if the
+request *rate* stays too high the retries are eventually exhausted and you'll
+see an error like::
+
+    illumio.exceptions.IllumioApiException: HTTPSConnectionPool(host='...', port=443):
+    Max retries exceeded with url: /api/v2/orgs/.../labels?key=app&value=AID011
+    (Caused by ResponseError('too many 429 error responses'))
+
+Default retry behavior
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Every :class:`PolicyComputeEngine <PolicyComputeEngine>` mounts a ``requests``
+retry adapter with these defaults:
+
+- ``total`` = ``retry_count`` (default **5**)
+- ``backoff_factor`` = **2** — waits of ~1, 2, 4, 8, 16 seconds between retries
+- ``status_forcelist`` = ``[429, 500, 502, 503, 504]``
+- the PCE's ``Retry-After`` header is honored
+
+Tuning what's exposed
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The number of retries and the per-request timeout are constructor arguments;
+the timeout can also be changed later:
+
+.. code-block:: python
+
+    pce = PolicyComputeEngine('my.pce.com', port=443, org_id=1,
+                              retry_count=10,       # Retry(total=10)
+                              request_timeout=60)   # seconds
+    pce.set_timeout(90)                             # change the timeout afterwards
+
+``backoff_factor`` and ``status_forcelist`` are **not** exposed through the
+public API and there is no ``set_retries`` method. To change them, mount your
+own adapter on the session:
+
+.. code-block:: python
+
+    from requests.adapters import HTTPAdapter
+    from urllib3.util.retry import Retry
+
+    pce = PolicyComputeEngine('my.pce.com', port=443, org_id=1)
+    pce.set_credentials(key, secret)
+
+    retry = Retry(
+        total=10,
+        backoff_factor=3,                 # 3, 6, 12, 24, ... seconds
+        status_forcelist=[429, 500, 502, 503, 504],
+        respect_retry_after_header=True,  # obey the PCE's Retry-After
+        # backoff_max=120,                # cap the wait (urllib3 >= 2)
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    pce._session.mount("https://", adapter)
+    pce._session.mount("http://", adapter)
+
+Prefer fixing the request rate
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+More retries only wait *longer* between the same volume of requests — they treat
+the symptom. A 429 storm usually comes from calling the API in a tight loop, for
+example resolving labels one at a time. Fetch the collection once and resolve
+in memory instead:
+
+.. code-block:: python
+
+    # one request instead of thousands
+    labels = pce.labels.get_all()
+    label_map = {(l.key, l.value): l for l in labels}
+
+    app_label = label_map.get(('app', 'AID011'))   # no API call
+
+For large collections, the async interface
+(:meth:`get_async <PolicyComputeEngine._PCEObjectAPI.get_async>` /
+``get_all``) has the PCE build the result as a single job rather than many paged
+GETs. If you issue requests concurrently, reduce the concurrency and add a small
+delay between batches.
