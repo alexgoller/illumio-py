@@ -89,6 +89,9 @@ The scripts
    * - `12_pairing_profiles.py <https://github.com/alexgoller/illumio-py/blob/main/examples/12_pairing_profiles.py>`_
      - Pairing profile + pairing key
      - creates/deletes
+   * - `13_onboard_unmanaged_workloads.py <https://github.com/alexgoller/illumio-py/blob/main/examples/13_onboard_unmanaged_workloads.py>`_
+     - Bulk-onboard unmanaged workloads + labels, rate-limit-safe
+     - creates/deletes
 
 Selected examples
 -----------------
@@ -106,4 +109,12 @@ Building an allow policy (``05_allow_rules.py``):
 Deny and override-deny rules (``06_deny_rules.py``):
 
 .. literalinclude:: ../../../examples/06_deny_rules.py
+   :language: python
+
+Onboarding unmanaged workloads at scale (``13_onboard_unmanaged_workloads.py``).
+This is the common "sync" pattern — prefetch the label map once, get-or-create
+labels from it, and ``bulk_create`` the workloads — which avoids the per-label
+``GET`` loop that causes :ref:`HTTP 429 rate-limit errors <guide-retries>`:
+
+.. literalinclude:: ../../../examples/13_onboard_unmanaged_workloads.py
    :language: python

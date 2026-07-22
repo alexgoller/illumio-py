@@ -44,6 +44,7 @@ python 01_connect.py
 | `10_bulk_operations.py` | Bulk create/delete workloads | creates/deletes drafts |
 | `11_settings_and_reporting.py` | Org settings, password policy, reports | read-only |
 | `12_pairing_profiles.py` | Pairing profile + pairing key for VEN onboarding | creates/deletes a profile |
+| `13_onboard_unmanaged_workloads.py` | **Bulk-onboard unmanaged workloads + labels the rate-limit-safe way** (prefetch label map → get-or-create → `bulk_create`) | creates/deletes drafts |
 
 ## Notes
 
