@@ -62,6 +62,12 @@ The documentation is split by what you're trying to do:
    getting-started/first-policy
 
 .. toctree::
+   :caption: Examples
+   :maxdepth: 1
+
+   examples/index
+
+.. toctree::
    :caption: Guides
    :maxdepth: 1
 
