@@ -1,6 +1,20 @@
 Changelog
 =========
 
+Version 1.3.2 (2026-07-22)
+--------------------------
+
+.. rubric:: DOCUMENTATION
+
+* Documented retry and HTTP 429 (rate-limit) handling in the connecting guide:
+  the default retry adapter (``retry_count``, ``backoff_factor``,
+  ``status_forcelist``, ``Retry-After``), how to tune ``retry_count`` /
+  ``request_timeout``, how to replace the session adapter for full control, and
+  the fetch-once / ``get_all`` pattern that avoids 429 storms. Expanded the
+  ``PolicyComputeEngine`` constructor docstring accordingly.
+* Added an Examples page to the documentation site that references and embeds the
+  runnable ``examples/`` scripts.
+
 Version 1.3.1 (2026-07-22)
 --------------------------
 
