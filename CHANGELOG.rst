@@ -1,6 +1,17 @@
 Changelog
 =========
 
+Version 1.3.4 (2026-07-23)
+--------------------------
+
+.. rubric:: DOCUMENTATION
+
+* Expanded ``examples/13_onboard_unmanaged_workloads.py``: build two label caches
+  (``{href: Label}`` and ``{(key, value): Label}``) for O(1) lookups both ways,
+  and add a single-workload label update by href (``pce.workloads.update``, no
+  ``GET`` needed). Demonstrates attaching ``Label``/``Reference`` objects
+  directly to reference fields (the client flattens them to ``{"href": ...}``).
+
 Version 1.3.3 (2026-07-22)
 --------------------------
 
