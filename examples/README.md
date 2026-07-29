@@ -45,6 +45,7 @@ python 01_connect.py
 | `11_settings_and_reporting.py` | Org settings, password policy, reports | read-only |
 | `12_pairing_profiles.py` | Pairing profile + pairing key for VEN onboarding | creates/deletes a profile |
 | `13_onboard_unmanaged_workloads.py` | **Bulk-onboard unmanaged workloads + labels the rate-limit-safe way** (prefetch label map → get-or-create → `bulk_create`) | creates/deletes drafts |
+| `14_async_rate_limited_sync.py` | **Async onboarding that stays under the rate limit** (`gather` + `Semaphore` + token-ish limiter + `to_thread`) | creates/deletes |
 
 ## Notes
 

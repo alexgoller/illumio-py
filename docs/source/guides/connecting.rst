@@ -135,5 +135,12 @@ in memory instead:
 For large collections, the async interface
 (:meth:`get_async <PolicyComputeEngine._PCEObjectAPI.get_async>` /
 ``get_all``) has the PCE build the result as a single job rather than many paged
-GETs. If you issue requests concurrently, reduce the concurrency and add a small
-delay between batches.
+GETs.
+
+If you drive the client from ``asyncio`` (wrapping the blocking calls in
+``asyncio.to_thread`` and fanning out with ``asyncio.gather`` /
+``asyncio.TaskGroup``), those calls run in parallel and will blow the limit
+unless you bound them. See the :ref:`async rate-limited example <examples>`
+(``examples/14_async_rate_limited_sync.py``), which prefetches labels, caps
+concurrency with an ``asyncio.Semaphore``, and paces the request rate with a
+small limiter.

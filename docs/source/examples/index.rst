@@ -92,6 +92,9 @@ The scripts
    * - `13_onboard_unmanaged_workloads.py <https://github.com/alexgoller/illumio-py/blob/main/examples/13_onboard_unmanaged_workloads.py>`_
      - Bulk-onboard unmanaged workloads + labels, rate-limit-safe
      - creates/deletes
+   * - `14_async_rate_limited_sync.py <https://github.com/alexgoller/illumio-py/blob/main/examples/14_async_rate_limited_sync.py>`_
+     - Async onboarding kept under the rate limit (gather + semaphore + limiter)
+     - creates/deletes
 
 Selected examples
 -----------------
@@ -117,4 +120,14 @@ labels from it, and ``bulk_create`` the workloads — which avoids the per-label
 ``GET`` loop that causes :ref:`HTTP 429 rate-limit errors <guide-retries>`:
 
 .. literalinclude:: ../../../examples/13_onboard_unmanaged_workloads.py
+   :language: python
+
+Async onboarding kept under the rate limit
+(``14_async_rate_limited_sync.py``). Driving the synchronous client from
+``asyncio`` with ``to_thread`` + ``gather`` runs the blocking calls in parallel;
+this shows how to keep that safe — prefetch labels, bound concurrency with a
+``Semaphore``, and pace the request rate with a small limiter. See
+:ref:`Retries and rate limiting <guide-retries>` for the background:
+
+.. literalinclude:: ../../../examples/14_async_rate_limited_sync.py
    :language: python
